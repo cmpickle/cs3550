@@ -355,3 +355,74 @@ BULK INSERT RoomType FROM 'C:\stage\FARMS1-1\RoomType.txt' WITH (FIELDTERMINATOR
 BULK INSERT TaxRate FROM 'C:\stage\FARMS1-1\TaxRate.txt' WITH (FIELDTERMINATOR='|')
 
 GO
+
+-- This script is for practicing SQL queries for Assignment 5
+-- Taks 1
+PRINT 'Beginning #1 - I''m inserting myself as a new guest....'
+
+GO
+
+INSERT INTO Guest VALUES('Cameron', 'Pickle', '4683 Cee Jay Ct', NULL, 'South Jordan', 'UT', '84009', 'United States', '801-694-8594', 'cmpickle@gmail.com', null)
+
+GO
+
+PRINT 'Here is the result of the Guest Table after I inserted myself...'
+
+PRINT '' --Does a blank line
+
+SELECT * From Guest
+
+-- Task 2
+PRINT 'Beginning #2 - I''m inserting myself a new Credit Card....'
+
+GO
+
+INSERT INTO CreditCard VALUES(@@IDENTITY, 'VISA', '123456789012346', NULL, 'Cameron Pickle', '2020-12-31 00:00:00')
+
+GO
+
+PRINT 'Here is the result of the Credit Card Table after I a credit card for myself...'
+
+PRINT '' --Does a blank line
+
+SELECT * From CreditCard
+
+-- Task 3
+PRINT 'Beginning #3 - I''m increasing the price of room type 1 in the current Rack Rate by 10% using ceiling rounding....'
+
+PRINT '#3 - I''m decreasing the price of room types 3&4 in the current Rack Rate by 10% using floor rounding....'
+
+PRINT '#3 - I''m inserting a coupon of $35.50 for CS3550 students that are currently enrolled and spend at least $200....'
+
+GO
+
+UPDATE RackRate SET RackRate=CEILING(RackRate*1.1) WHERE CAST(GETDATE() AS DATE) > RackRateBegin AND CAST(GETDATE() AS DATE) < RackRateEnd AND RoomTypeID = 1
+
+UPDATE RackRate SET RackRate=FLOOR(RackRate*.9) WHERE CAST(GETDATE() AS DATE) > RackRateBegin AND CAST(GETDATE() AS DATE) < RackRateEnd AND (RoomTypeID=3 OR RoomTypeID=4)
+
+INSERT INTO Discount VALUES('CS3550 Discount', '2017-7-31', 'min stay price of $200 - student must be currently enrolled in CS3550', 0, 35.50)
+
+GO
+
+PRINT 'Here is the result of the Rack Rate and Discount Tables after the changes...'
+
+PRINT '' --Does a blank line
+
+SELECT * FROM RackRate
+
+SELECT * FROM Discount
+
+-- Task 4
+PRINT 'Beginning #4 - I''m determining the Rack Rate and nightly tax for room number 302 at Sunridge form any date between June 26 and July 6....'
+
+GO
+
+INSERT INTO CreditCard VALUES(@@IDENTITY, 'VISA', '123456789012346', NULL, 'Cameron Pickle', '2020-12-31 00:00:00')
+
+GO
+
+PRINT 'Here is the result of the Credit Card Table after I a credit card for myself...'
+
+PRINT '' --Does a blank line
+
+SELECT * From CreditCard
