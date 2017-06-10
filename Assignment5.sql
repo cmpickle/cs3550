@@ -91,7 +91,7 @@ RoomID				smallint		NOT NULL,
 QuotedRate			smallmoney		NOT NULL,
 CheckinDate			smalldatetime	NOT NULL,
 Nights				tinyint			NOT NULL,
-Status				char(1)			NOT NULL,
+[Status]			char(1)			NOT NULL,
 Comments			varchar(200)	NULL,
 DiscountID			smallint		NOT NULL
 )
@@ -362,7 +362,8 @@ PRINT 'Beginning #1 - I''m inserting myself as a new guest....'
 
 GO
 
-INSERT INTO Guest VALUES('Cameron', 'Pickle', '4683 Cee Jay Ct', NULL, 'South Jordan', 'UT', '84009', 'United States', '801-694-8594', 'cmpickle@gmail.com', null)
+INSERT INTO Guest 
+VALUES('Cameron', 'Pickle', '4683 Cee Jay Ct', NULL, 'South Jordan', 'UT', '84009', 'United States', '801-694-8594', 'cmpickle@gmail.com', null)
 
 GO
 
@@ -372,12 +373,15 @@ PRINT '' --Does a blank line
 
 SELECT * From Guest
 
+GO
+
 -- Task 2
 PRINT 'Beginning #2 - I''m inserting myself a new Credit Card....'
 
 GO
 
-INSERT INTO CreditCard VALUES(@@IDENTITY, 'VISA', '123456789012346', NULL, 'Cameron Pickle', '2020-12-31 00:00:00')
+INSERT INTO CreditCard 
+VALUES(@@IDENTITY, 'VISA', '123456789012346', NULL, 'Cameron Pickle', '2020-12-31 00:00:00')
 
 GO
 
@@ -386,6 +390,8 @@ PRINT 'Here is the result of the Credit Card Table after I a credit card for mys
 PRINT '' --Does a blank line
 
 SELECT * From CreditCard
+
+GO
 
 -- Task 3
 PRINT 'Beginning #3 - I''m increasing the price of room type 1 in the current Rack Rate by 10% using ceiling rounding....'
@@ -396,9 +402,13 @@ PRINT '#3 - I''m inserting a coupon of $35.50 for CS3550 students that are curre
 
 GO
 
-UPDATE RackRate SET RackRate=CEILING(RackRate*1.1) WHERE CAST(GETDATE() AS DATE) > RackRateBegin AND CAST(GETDATE() AS DATE) < RackRateEnd AND RoomTypeID = 1
+UPDATE RackRate 
+SET RackRate=CEILING(RackRate*1.1) 
+WHERE CAST(GETDATE() AS DATE) > RackRateBegin AND CAST(GETDATE() AS DATE) < RackRateEnd AND RoomTypeID = 1
 
-UPDATE RackRate SET RackRate=FLOOR(RackRate*.9) WHERE CAST(GETDATE() AS DATE) > RackRateBegin AND CAST(GETDATE() AS DATE) < RackRateEnd AND (RoomTypeID=3 OR RoomTypeID=4)
+UPDATE RackRate 
+SET RackRate=FLOOR(RackRate*.9) 
+WHERE CAST(GETDATE() AS DATE) > RackRateBegin AND CAST(GETDATE() AS DATE) < RackRateEnd AND (RoomTypeID=3 OR RoomTypeID=4)
 
 INSERT INTO Discount VALUES('CS3550 Discount', '2017-7-31', 'min stay price of $200 - student must be currently enrolled in CS3550', 0, 35.50)
 
@@ -412,17 +422,136 @@ SELECT * FROM RackRate
 
 SELECT * FROM Discount
 
+GO
+
 -- Task 4
 PRINT 'Beginning #4 - I''m determining the Rack Rate and nightly tax for room number 302 at Sunridge form any date between June 26 and July 6....'
 
 GO
 
-INSERT INTO CreditCard VALUES(@@IDENTITY, 'VISA', '123456789012346', NULL, 'Cameron Pickle', '2020-12-31 00:00:00')
+PRINT 'Here is the Rack Rate and nightly tax for room number 302 at Sunridge from any date between June 26 and July 6...'
 
 GO
 
-PRINT 'Here is the result of the Credit Card Table after I a credit card for myself...'
+SELECT RackRate.RackRate 'Rack Rate', TaxRate.RoomTaxRate 'Nightly Tax', RackRateBegin, RackRateEnd, RoomID
+FROM TaxRate 
+JOIN Hotel ON TaxRate.TaxLocationID=Hotel.TaxLocationID 
+JOIN RackRate ON Hotel.HotelID=RackRate.HotelID 
+JOIN RoomType ON RackRate.RoomTypeID=RoomType.RoomTypeID
+JOIN Room ON RoomType.RoomTypeID=Room.RoomTypeID
+WHERE RackRateBegin <= '06-26-2017' 
+AND RackRateEnd >= '07-06-2017'
+AND Hotel.HotelName = 'Sunridge Bed & Breakfast'
+AND Room.RoomNumber = '302'
+
+GO
 
 PRINT '' --Does a blank line
 
-SELECT * From CreditCard
+GO
+
+-- Task 5
+PRINT 'Beginning #5 - I''m making a master reservation at Sunridge B&B with 2 folio details....'
+
+GO
+
+INSERT INTO Reservation 
+VALUES(GETDATE(), 'R', null, (SELECT TOP 1 CreditCardID FROM CreditCard c JOIN Guest g ON c.GuestID=g.GuestID WHERE GuestFirst='Cameron' AND GuestLast='Pickle'))
+
+INSERT INTO Folio 
+VALUES('5020', '7', '4', '235', '06-26-2017', '3', 'R', null, '10')
+
+INSERT INTO Folio 
+VALUES('5020', '7', '4', '235', '07-06-2017', '3', 'R', null, '10')
+
+GO
+
+PRINT 'Here is the result of the Reservation Table after I make a reservation for myself...'
+
+PRINT '' --Does a blank line
+
+SELECT * From Reservation
+
+PRINT 'Here is the result of the Folio Table after I make a reservation for myself...'
+
+PRINT '' --Does a blank line
+
+SELECT * FROM Folio
+
+GO
+
+-- Task 6
+PRINT 'Beginning #6 - I''m displaying the hotel name, room number, room description and rack rate for all rooms with a rack rate at or above $138.00 per night....'
+
+GO
+
+SELECT HotelName 'Hotel Name', RoomNumber 'Room Number', RoomDescription 'Room Description', '$' + CONVERT(varchar(12), RackRate) 'Rack Rate'
+FROM Hotel h 
+JOIN Room r ON r.HotelID=h.HotelID
+JOIN RoomType rt ON rt.RoomTypeID=r.RoomTypeID
+JOIN RackRate rr ON rr.RoomTypeID=rt.RoomTypeID
+WHERE RackRate >= '138'
+AND DATEPART(m, RackRateBegin) <= 6
+AND DATEPART(m, RackRateEnd) >= 6 
+ORDER BY RackRate ASC
+
+GO
+
+-- Task 7
+PRINT 'Beginning #7 - For each hotel, list the hotel name and the count of rooms by floor, for all rooms at each hotel.....'
+
+GO
+
+SELECT SUBSTRING(HotelName, 1, PATINDEX('% %',HotelName)) 'Hotel Name',SUBSTRING(RoomNumber,1,1) [Floor], COUNT(RoomNumber) 'Number of Rooms'
+FROM Hotel h 
+JOIN Room r ON r.HotelID=h.HotelID
+GROUP BY HotelName, SUBSTRING(RoomNumber,1,1)
+ORDER BY HotelName, FLOOR
+
+GO
+
+-- Task 8
+PRINT 'Beginning #8 - For check-ins during June and July, what is the total number of arrivals and the average length of stay by hotel name and month.....'
+
+GO
+
+SELECT HotelName 'Hotel', CONVERT(varchar(3), CheckInDate, 100) 'Month', COUNT(CheckInDate) 'Arrivals', CAST(AVG(CAST(Nights AS DECIMAL(2,1))) AS DECIMAL(2,1)) 'Average Stay'
+FROM Hotel h
+JOIN Room r ON h.HotelID=r.HotelID
+JOIN Folio f ON f.RoomID=r.RoomID
+GROUP BY HotelName, CONVERT(varchar(3), CheckInDate, 100)
+ORDER BY HotelName, [Month]
+
+GO
+
+-- Task 9
+PRINT 'Beginning #9 - List the guest name, hotel name, room number, arrival date, and departure date for all folio check-in dates that occur on a Monday-Thursday......'
+
+GO
+
+SELECT GuestLast + ' ' + GuestFirst 'Guest Name', HotelName 'Hotel', RoomNumber 'Room Number', CONVERT(varchar(20),CheckInDate, 107) 'Arrival Date', CONVERT(varchar(20), DATEADD(d, Nights, CheckinDate), 107) 'Departure Date'
+FROM Guest g
+JOIN CreditCard cc ON g.GuestID=cc.GuestID
+JOIN Reservation r ON r.CreditCardID=cc.CreditCardID
+JOIN Folio f ON f.ReservationID=r.ReservationID
+JOIN Room rm ON f.RoomID=rm.RoomID
+JOIN Hotel h ON rm.HotelID=h.HotelID
+WHERE DATEPART(dw, CheckinDate) IN (2,3,4,5)
+
+GO
+
+-- Task 10
+PRINT 'Beginning #9 - List the guest name, hotel name, room number, arrival date, and departure date for all folio check-in dates that occur on a Monday-Thursday......'
+
+GO
+
+SELECT GuestLast + ' ' + GuestFirst 'Guest Name', HotelName 'Hotel', RoomNumber 'Room Number', CONVERT(varchar(20),CheckInDate, 107) 'Arrival Date', CONVERT(varchar(20), DATEADD(d, Nights, CheckinDate), 107) 'Departure Date'
+FROM Guest g
+JOIN CreditCard cc ON g.GuestID=cc.GuestID
+JOIN Reservation r ON r.CreditCardID=cc.CreditCardID
+JOIN Folio f ON f.ReservationID=r.ReservationID
+JOIN Room rm ON f.RoomID=rm.RoomID
+JOIN Hotel h ON rm.HotelID=h.HotelID
+WHERE DATEPART(dw, CheckinDate) IN (2,3,4,5)
+
+GO

@@ -91,7 +91,7 @@ RoomID				smallint		NOT NULL,
 QuotedRate			smallmoney		NOT NULL,
 CheckinDate			smalldatetime	NOT NULL,
 Nights				tinyint			NOT NULL,
-Status				char(1)			NOT NULL,
+[Status]			char(1)			NOT NULL,
 Comments			varchar(200)	NULL,
 DiscountID			smallint		NOT NULL
 )
