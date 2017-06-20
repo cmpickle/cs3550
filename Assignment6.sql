@@ -366,7 +366,9 @@ USE Pickle_FARMS
 
 GO
 
+----------------------------------------------------------------------------------
 -- #1 - sp_InsertGuest
+----------------------------------------------------------------------------------
 
 -- check to see if sp_InsertGuest exists
 IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_NAME= 'sp_InsertGuest')
@@ -434,7 +436,9 @@ SELECT * FROM Guest
 
 GO
 
+----------------------------------------------------------------------------------
 -- #2 - sp_InsertRoomType
+----------------------------------------------------------------------------------
 
 -- check to see if sp_InsertRoomType exists
 IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_NAME= 'sp_InsertRoomType')
@@ -526,7 +530,53 @@ SELECT * FROM RackRate
 
 GO
 
+----------------------------------------------------------------------------------
+-- #3 - sp_UpdateRackRates
+----------------------------------------------------------------------------------
 
+-- check to see if sp_UpdateRackRates exists
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_NAME= 'sp_UpdateRackRates')
+	DROP PROCEDURE sp_UpdateRackRates;
+GO
 
+CREATE PROCEDURE sp_UpdateRackRates
+	@HotelID				smallint,
+	@RoomTypeID				smallint = NULL,
+	@RackRateBegin			date,
+	@RRPercentage			decimal(4,2),
+	@RRIncreaseOrDecrease	char(2)
+AS
+BEGIN
+	UPDATE RackRate SET RackRate = CASE
+	WHEN @RRIncreaseOrDecrease = 'in' THEN CEILING(((@RRPercentage / 100)+1) * RackRate)
+	WHEN @RRIncreaseOrDecrease = 'de' THEN FLOOR(((-1 * @RRPercentage / 100)+1) * RackRate)
+	END, -- case
+	RackRateBegin = @RackRateBegin
+	WHERE (@RoomTypeID IS NULL OR RoomTypeID = @RoomTypeID)
+	AND @RackRateBegin BETWEEN RackRateBegin AND RackRateEnd
+	AND @HotelID = HotelID
 
-exec sp_help RoomType
+END
+
+GO
+
+EXEC sp_UpdateRackRates
+	@HotelID				= 2100,
+	@RoomTypeID				= 1,
+	@RackRateBegin			= '11/14/2017',
+	@RRPercentage			= 6.66,
+	@RRIncreaseOrDecrease	= 'de'
+	
+GO
+
+SELECT * FROM RackRate
+
+GO
+
+EXEC sp_UpdateRackRates
+	@HotelID				= 2300,
+	@RackRateBegin			= '07/31/2017',
+	@RRPercentage			= 5.55,
+	@RRIncreaseOrDecrease	= 'in'
+
+SELECT * FROM RackRate where '7/31/2017' BETWEEN RackRateBegin and RackRateEnd and HotelID = 2300
