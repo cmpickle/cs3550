@@ -432,4 +432,101 @@ GO
 	
 SELECT * FROM Guest
 
-exec sp_help Guest
+GO
+
+-- #2 - sp_InsertRoomType
+
+-- check to see if sp_InsertRoomType exists
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_NAME= 'sp_InsertRoomType')
+	DROP PROCEDURE sp_InsertRoomType;
+GO
+
+-- check to see if sp_InsertRackRate exists
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_NAME= 'sp_InsertRackRate')
+	DROP PROCEDURE sp_InsertRackRate;
+GO
+
+-- create child procedure
+CREATE PROCEDURE sp_InsertRackRate
+	@RoomTypeID				smallint,
+	@HotelID				smallint,
+	@RackRate				smallmoney,
+	@RackRateBegin			date,
+	@RackRateEnd			date,
+	@RackRateDescription	varchar(max),
+	@RackRateID				smallint OUTPUT
+AS
+BEGIN
+INSERT INTO RackRate (RoomTypeID, HotelID, RackRate, RackRateBegin, RackRateEnd, RackRateDescription)
+	VALUES(
+		@RoomTypeID,
+		@HotelID,
+		@RackRate,
+		@RackRateBegin,
+		@RackRateEnd,
+		@RackRateDescription)
+		
+	SELECT @RackRateID = @@IDENTITY
+	
+END
+
+GO
+
+-- create parent procedure
+CREATE PROCEDURE sp_InsertRoomType
+	@RTDescription			varchar(200),
+	@NewHotelID				smallint,
+	@NewRackRate			smallmoney,
+	@NewRackRateBegin		date,
+	@NewRackRateEnd			date,
+	@NewRackRateDescription	varchar(max),
+	@NewRackRateID			smallint,
+	@NewRoomTypeID			smallint OUTPUT
+AS
+BEGIN
+INSERT INTO RoomType (RTDescription)
+	VALUES(
+		@RTDescription)
+		
+	SELECT @NewRoomTypeID = @@IDENTITY
+	
+	EXEC sp_InsertRackRate
+		@RoomTypeID = @NewRoomTypeID,
+		@HotelID = @NewHotelID,
+		@RackRate = @NewRackRate,
+		@RackRateBegin = @NewRackRateBegin,
+		@RackRateEnd = @NewRackRateEnd,
+		@RackRateDescription = @NewRackRateDescription,
+		@RackRateID = @NewRackRate
+	
+END
+
+GO
+
+-- test by inserting a 'MasterSuite'
+DECLARE @OutRackRate smallint
+DECLARE @OutRoomTypeID smallint
+
+EXEC sp_InsertRoomType
+	@RTDescription			= 'MasterSuite',
+	@NewHotelID				= 2100,
+	@NewRackRate			= 299,
+	@NewRackRateBegin		= '01/01/2016',
+	@NewRackRateEnd			= '12/31/2016',
+	@NewRackRateDescription	= 'Special Rate for new Master Suites',
+	@NewRackRateID			= @OutRackRate,
+	@NewRoomTypeID			= @OutRoomTypeID OUTPUT
+
+PRINT 'New Rack Rate for assigned is ' + CONVERT(varchar(10), @OutRackRate)
+PRINT 'New Room Type ID for assigned is ' + CONVERT(varchar(10), @OutRoomTypeID)
+	
+GO
+	
+SELECT * FROM RackRate
+
+GO
+
+
+
+
+exec sp_help RoomType
