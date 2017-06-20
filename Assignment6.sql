@@ -578,5 +578,13 @@ EXEC sp_UpdateRackRates
 	@RackRateBegin			= '07/31/2017',
 	@RRPercentage			= 5.55,
 	@RRIncreaseOrDecrease	= 'in'
+	
+GO
+
+SELECT * FROM RackRate
+
+GO
+
+
 
 SELECT * FROM RackRate where '7/31/2017' BETWEEN RackRateBegin and RackRateEnd and HotelID = 2300
