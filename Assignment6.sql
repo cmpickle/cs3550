@@ -563,7 +563,7 @@ GO
 EXEC sp_UpdateRackRates
 	@HotelID				= 2100,
 	@RoomTypeID				= 1,
-	@RackRateBegin			= '11/14/2017',
+	@RackRateBegin			= '6/20/2017',
 	@RRPercentage			= 6.66,
 	@RRIncreaseOrDecrease	= 'de'
 	
@@ -575,7 +575,7 @@ GO
 
 EXEC sp_UpdateRackRates
 	@HotelID				= 2300,
-	@RackRateBegin			= '07/31/2017',
+	@RackRateBegin			= '7/1/2017',
 	@RRPercentage			= 5.55,
 	@RRIncreaseOrDecrease	= 'in'
 	
@@ -585,6 +585,206 @@ SELECT * FROM RackRate
 
 GO
 
+----------------------------------------------------------------------------------
+-- #4 - sp_UpdateFolio
+----------------------------------------------------------------------------------
 
+-- check to see if sp_UpdateFolio exists
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_NAME= 'sp_UpdateFolio')
+	DROP PROCEDURE sp_UpdateFolio;
+GO
 
-SELECT * FROM RackRate where '7/31/2017' BETWEEN RackRateBegin and RackRateEnd and HotelID = 2300
+CREATE PROCEDURE sp_UpdateFolio
+	@FolioID				smallint,
+	@CheckinDate			varchar(10) = NULL,
+	@Nights					varchar(max) = NULL,
+	@Status					varchar(10) = NULL
+AS
+BEGIN
+	
+	DECLARE @CheckNights smallint
+	DECLARE @CheckCheckinDate smalldatetime
+	DECLARE @ErrorMessage varchar(200)
+	
+	BEGIN TRY
+	
+		SET @CheckNights = CONVERT(smallint, @Nights)
+		END TRY
+		
+	BEGIN CATCH
+		SET @ErrorMessage = ('"' + @Nights + '" is not a valid number of nights. Please enter a valid number.')
+		RAISERROR (@ErrorMessage, -1, -1, @Nights)
+		RETURN -1
+	END CATCH
+		
+	BEGIN TRY
+	
+		SET @CheckCheckinDate = CONVERT(smalldatetime, @CheckinDate)
+		END TRY
+		
+	BEGIN CATCH
+		SET @ErrorMessage = ('"' + @CheckinDate + '" is not a valid date. Please enter a valid date.')
+		RAISERROR (@ErrorMessage, -1, -1, @CheckinDate)
+		RETURN -1
+	END CATCH
+
+	UPDATE Folio 
+	SET CheckinDate = CASE
+	WHEN @CheckinDate IS NOT NULL THEN @CheckinDate 
+	WHEN @CheckinDate IS NULL THEN CheckinDate
+	END,
+	Nights = CASE
+	WHEN @Nights IS NOT NULL THEN @Nights
+	WHEN @Nights IS NULL THEN Nights
+	END,
+	Status = CASE
+	WHEN @Status IS NOT NULL THEN @Status
+	WHEN @Status IS NULL THEN Status
+	END -- case
+	WHERE FolioID = @FolioID
+
+END
+
+GO
+
+EXEC sp_UpdateFolio
+	@FolioID		= 1,
+	@Status			= 'R'
+	
+GO
+
+EXEC sp_UpdateFolio
+	@FolioID		= 2,
+	@CheckinDate	= '6/20/2017'
+	
+GO
+
+SELECT * FROM Folio
+
+GO
+
+EXEC sp_UpdateFolio
+	@FolioID		= 3,
+	@CheckinDate	= 'R'
+
+GO
+
+----------------------------------------------------------------------------------
+-- #5 - sp_GetRackRates
+----------------------------------------------------------------------------------
+
+-- check to see if sp_GetRackRates exists
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_NAME= 'sp_GetRackRates')
+	DROP PROCEDURE sp_GetRackRates;
+GO
+
+CREATE PROCEDURE sp_GetRackRates
+	@HotelID		smallint
+AS
+BEGIN
+	
+	-- declare variables for ease of printing later
+	DECLARE @ErrMessage		varchar(max)
+	DECLARE @HotelName		varchar(30)
+	DECLARE @HotelAddress	varchar(30)
+	DECLARE @HotelCity		varchar(20)
+	
+	DECLARE @RoomNumber		varchar(5)
+	DECLARE @RTDescription	varchar(200)
+	DECLARE @RackRate		varchar(20)
+	DECLARE @RackRateBegin	varchar(20)
+	DECLARE @RackRateEnd	varchar(20)
+	DECLARE @RackRateDescription varchar(200)
+	
+	IF NOT EXISTS(SELECT HotelID FROM Hotel WHERE HotelID = @HotelID)
+	BEGIN
+		SET @ErrMessage = ('"' + CONVERT(varchar, @HotelID) + '" is not a valid HotelID.')
+		RAISERROR (@ErrMessage, -1, -1, @HotelID)
+		RETURN -1
+	END
+	
+	SELECT @HotelName = HotelName, @HotelAddress = HotelAddress,
+			@HotelCity = HotelCity
+	FROM Hotel
+	WHERE HotelID = @HotelID
+	
+	PRINT 'Hotel Information'
+	PRINT @HotelName
+	PRINT @HotelAddress
+	PRINT @HotelCity
+	
+	PRINT ''
+	PRINT 'Rack Rate Information'
+	
+	IF NOT EXISTS(SELECT HotelID FROM RackRate WHERE HotelID = @HotelID)
+	BEGIN
+		PRINT 'No Rack Rate for this Hotel.'
+		RETURN 
+	END
+	
+	DECLARE RoomCursor CURSOR FOR
+	SELECT RoomNumber, RTDescription
+	FROM RackRate rr
+	JOIN RoomType rt ON rr.RoomTypeID = rt.RoomTypeID
+	JOIN Room r ON rt.RoomTypeID = r.RoomTypeID
+	GROUP BY RoomNumber, RTDescription, rr.HotelID
+	HAVING rr.HotelID = @HotelID
+	
+	OPEN RoomCursor
+	
+	-- Fetch First Time
+	FETCH NEXT FROM RoomCursor
+	INTO @RoomNumber, @RTDescription
+	
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		PRINT 'Room ' + @RoomNumber + ': ' + @RTDescription
+		
+		
+		
+		DECLARE RackRateCursor CURSOR FOR
+		SELECT RackRate, RackRateBegin, RackRateEnd
+		FROM RackRate rr
+		JOIN RoomType rt ON rr.RoomTypeID = rt.RoomTypeID
+		JOIN Room r ON rt.RoomTypeID = r.RoomTypeID
+		WHERE rr.HotelID = @HotelID
+		AND RoomNumber = @RoomNumber
+	
+		OPEN RackRateCursor
+	
+		-- Fetch First Time
+		FETCH NEXT FROM RackRateCursor
+		INTO @RackRate, @RackRateBegin, @RackRateEnd
+	
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			PRINT 'Rate:  ' + @RackRate + ' valid ' + @RackRateBegin + ' to ' + @RackRateEnd
+		
+			-- Fetch Again
+			FETCH NEXT FROM RackRateCursor
+			INTO @RackRate, @RackRateBegin, @RackRateEnd
+		
+		END
+	
+		CLOSE RackRateCursor
+		DEALLOCATE RackRateCursor
+		
+		
+		
+		PRINT ''
+		
+		-- Fetch Again
+		FETCH NEXT FROM RoomCursor
+		INTO @RoomNumber, @RTDescription
+		
+	END
+	
+	CLOSE RoomCursor
+	DEALLOCATE RoomCursor
+	
+END
+GO
+
+EXEC sp_GetRackRates 2100
+
+GO
