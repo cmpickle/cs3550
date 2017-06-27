@@ -379,11 +379,59 @@ CREATE FUNCTION dbo.GetRoomTaxRate
 	(
 	@RoomID smallint
 	)
-RETURNS decimal
+RETURNS decimal(4,2)
 AS
 	BEGIN
-			DECLARE @result decimal
+			DECLARE @result decimal(4,2)
 			SET @result = 0
-			SET @result = 
+			SET @result = (	SELECT RoomTaxRate 
+							FROM dbo.TaxRate 
+							JOIN dbo.Hotel 
+							ON dbo.TaxRate.TaxLocationID = dbo.Hotel.TaxLocationID 
+							JOIN dbo.Room 
+							ON dbo.Room.HotelID = dbo.Hotel.HotelID 
+							WHERE dbo.Room.RoomID = @RoomID)
 	RETURN @result
 	END
+	
+GO
+	
+SELECT dbo.GetRoomTaxRate(RoomID) FROM Room
+
+GO
+
+----------------------------------------------------------------------------------
+-- #2 - dbo.GetRackRate
+----------------------------------------------------------------------------------
+
+IF OBJECT_ID (N'dbo.GetRackRate', N'FN') IS NOT NULL
+	DROP FUNCTION dbo.GetRackRate
+	
+GO
+
+CREATE FUNCTION dbo.GetRackRate
+	(
+	@RoomID smallint,
+	@Date date
+	)
+RETURNS smallmoney
+AS
+	BEGIN
+			DECLARE @result smallmoney
+			SET @result = 0
+			SET @result = (	SELECT RackRate 
+							FROM dbo.RackRate 
+							JOIN dbo.RoomType 
+							ON dbo.RackRate.RoomTypeID = dbo.RoomType.RoomTypeID 
+							JOIN dbo.Room 
+							ON dbo.Room.RoomTypeID = dbo.RoomType.RoomTypeID 
+							WHERE dbo.Room.RoomID = @RoomID
+							AND @Date BETWEEN RackRateBegin AND RackRateEnd)
+	RETURN @result
+	END
+	
+GO
+	
+SELECT dbo.GetRackRate(12, GETDATE())
+
+GO
