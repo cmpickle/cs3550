@@ -370,9 +370,8 @@ GO
 -- #1 - dbo.GetRoomTaxRate
 ----------------------------------------------------------------------------------
 
-IF OBJECT_ID (N'dbo.GetRoomTaxRate', N'FN') IS NOT NULL
-	DROP FUNCTION dbo.GetRoomTaxRate
-	
+IF EXISTS(SELECT name FROM sys.objects WHERE name = N'GetRoomTaxRate')
+	DROP FUNCTION GetRoomTaxRate
 GO
 
 CREATE FUNCTION dbo.GetRoomTaxRate
@@ -404,9 +403,8 @@ GO
 -- #2 - dbo.GetRackRate
 ----------------------------------------------------------------------------------
 
-IF OBJECT_ID (N'dbo.GetRackRate', N'FN') IS NOT NULL
-	DROP FUNCTION dbo.GetRackRate
-	
+IF EXISTS(SELECT name FROM sys.objects WHERE name = N'GetRackRate')
+	DROP FUNCTION GetRackRate
 GO
 
 CREATE FUNCTION dbo.GetRackRate
@@ -433,5 +431,166 @@ AS
 GO
 	
 SELECT dbo.GetRackRate(12, GETDATE())
+
+GO
+
+----------------------------------------------------------------------------------
+-- #3 - dbo.ProduceBill
+----------------------------------------------------------------------------------
+
+IF EXISTS(SELECT name FROM sys.objects WHERE name = N'ProduceBill')
+	DROP FUNCTION ProduceBill
+GO
+
+CREATE FUNCTION dbo.ProduceBill
+	(
+	@FolioID smallint
+	)
+RETURNS @Bill TABLE
+(
+	[Info] varchar(max)
+)
+AS
+	BEGIN
+			INSERT INTO @Bill
+			SELECT 'Guest Name: ' + GuestFirst + ' ' + GuestLast + char(13) + char(10) + 
+					'Address Line 1: ' + GuestAddress1 + CHAR(13) + CHAR(10) + 
+					'Address Line 2: ' + GuestAddress2 + CHAR(13) + CHAR(10) + 
+					'City: ' + GuestCity + CHAR(13) + CHAR(10) + 
+					'Country: ' + GuestCountry + CHAR(13) + CHAR(10) + 
+					'Room Number: ' + RoomNumber + CHAR(13) + CHAR(10) + 
+					'Checkin Date: ' + CONVERT(varchar, CheckinDate, 107) AS 'Bill'
+			FROM dbo.Guest 
+			JOIN dbo.CreditCard
+			ON dbo.Guest.GuestID = dbo.CreditCard.GuestID
+			JOIN dbo.Reservation
+			ON dbo.CreditCard.CreditCardID = dbo.Reservation.CreditCardID
+			JOIN dbo.Folio
+			ON dbo.Folio.ReservationID = dbo.Reservation.ReservationID
+			JOIN Room
+			ON dbo.Folio.RoomID = dbo.Room.RoomID 
+			WHERE FolioID = @FolioID
+			
+			RETURN
+	END
+	
+GO
+	
+SELECT * FROM dbo.ProduceBill(1)	
+
+GO
+	
+SELECT * FROM dbo.ProduceBill(4)
+
+GO
+
+----------------------------------------------------------------------------------
+-- #4 - dbo.ApplyDiscounts
+----------------------------------------------------------------------------------
+
+IF EXISTS(SELECT name FROM sys.objects WHERE name = N'ApplyDiscounts')
+	DROP FUNCTION ApplyDiscounts
+GO
+
+CREATE FUNCTION dbo.ApplyDiscounts
+	(
+	@FolioID smallint
+	)
+RETURNS @Discount TABLE
+(
+	[Quoted Rate] DECIMAL(5,2),
+	[Discounted Rate] DECIMAL(5,2),
+	[Status] varchar(max)
+)
+AS
+	BEGIN
+		IF NOT EXISTS (SELECT FolioID FROM Folio WHERE FolioID = @FolioID)
+			INSERT INTO @Discount
+			VALUES(NULL, NULL, 'The Folio ID ' + CAST(@FolioID AS varchar) + ' is invalid')
+		ELSE
+		
+		INSERT INTO @Discount
+		SELECT QuotedRate, CAST(((QuotedRate - DiscountAmount) * (1-DiscountPercent/100)) AS DECIMAL(6,2)) AS 'Discounted Rate', [Status]
+		FROM dbo.Folio
+		JOIN dbo.Discount
+		ON dbo.Folio.DiscountID = dbo.Discount.DiscountID
+		WHERE dbo.Folio.FolioID = @FolioID
+		
+		RETURN
+	END
+	
+GO
+	
+SELECT * FROM dbo.ApplyDiscounts(999)
+
+GO
+	
+SELECT * FROM dbo.ApplyDiscounts(3)
+
+GO
+	
+SELECT * FROM dbo.ApplyDiscounts(5)
+
+GO
+	
+SELECT * FROM dbo.ApplyDiscounts(11)
+
+GO
+
+----------------------------------------------------------------------------------
+-- #5 - dbo.CalculateCancellationFees 
+----------------------------------------------------------------------------------
+
+IF EXISTS(SELECT name FROM sys.objects WHERE name = N'CalculateCancellationFees ')
+	DROP FUNCTION CalculateCancellationFees 
+GO
+
+CREATE FUNCTION dbo.CalculateCancellationFees 
+	(
+	@FolioID smallint,
+	@CancellationDate date
+	)
+RETURNS @Cancellation TABLE
+(
+	FolioID smallint,
+	[Quoted Rate] smallmoney,
+	[Cancellation Charge] smallmoney
+)
+AS
+	BEGIN
+		DECLARE @ChargePercent smallmoney
+		SET @ChargePercent = 0
+		IF DATEDIFF(dd, @CancellationDate, (SELECT CheckinDate FROM Folio WHERE FolioID = @FolioID))<=30 AND 
+		   DATEDIFF(dd, @CancellationDate, (SELECT CheckinDate FROM Folio WHERE FolioID = @FolioID))>=14
+				SET @ChargePercent = 75
+		ELSE IF DATEDIFF(dd, @CancellationDate, (SELECT CheckinDate FROM Folio WHERE FolioID = @FolioID))<=13 AND 
+				DATEDIFF(dd, @CancellationDate, (SELECT CheckinDate FROM Folio WHERE FolioID = @FolioID))>=8
+				SET @ChargePercent = 50
+		ELSE IF DATEDIFF(dd, @CancellationDate, (SELECT CheckinDate FROM Folio WHERE FolioID = @FolioID))<=7
+				SET @ChargePercent = 100
+	
+		INSERT INTO @Cancellation
+		SELECT FolioID, QuotedRate, CAST(QuotedRate*@ChargePercent/100 * dbo.GetRoomTaxRate(RoomID)/100 AS DECIMAL(5,2))  AS 'Cancellation Charge'
+		FROM dbo.Discount
+		JOIN dbo.Folio
+		ON dbo.Folio.DiscountID = dbo.Discount.DiscountID
+		JOIN Reservation
+		ON dbo.Folio.ReservationID = dbo.Reservation.ReservationID
+		WHERE dbo.Folio.FolioID = @FolioID
+		
+		RETURN
+	END
+	
+GO
+	
+SELECT * FROM dbo.CalculateCancellationFees (7, '7/6/2017')
+
+GO
+	
+SELECT * FROM dbo.CalculateCancellationFees (15, '7/6/2017')
+
+GO
+	
+SELECT * FROM dbo.CalculateCancellationFees (11, '7/31/2017')
 
 GO
