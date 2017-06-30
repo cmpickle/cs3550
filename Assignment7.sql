@@ -418,19 +418,26 @@ AS
 			DECLARE @result smallmoney
 			SET @result = 0
 			SET @result = (	SELECT RackRate 
-							FROM dbo.RackRate 
-							JOIN dbo.RoomType 
-							ON dbo.RackRate.RoomTypeID = dbo.RoomType.RoomTypeID 
-							JOIN dbo.Room 
-							ON dbo.Room.RoomTypeID = dbo.RoomType.RoomTypeID 
-							WHERE dbo.Room.RoomID = @RoomID
+							FROM Room
+							JOIN dbo.RoomType
+							ON dbo.Room.RoomTypeID = dbo.RoomType.RoomTypeID
+							JOIN dbo.RackRate
+							ON dbo.RoomType.RoomTypeID = dbo.RackRate.RoomTypeID
+							JOIN dbo.Hotel
+							ON dbo.RackRate.HotelID = dbo.Hotel.HotelID
+							AND dbo.Room.RoomID = @RoomID
+							AND dbo.Room.HotelID = dbo.Hotel.HotelID
 							AND @Date BETWEEN RackRateBegin AND RackRateEnd)
 	RETURN @result
 	END
 	
 GO
 	
-SELECT dbo.GetRackRate(12, GETDATE())
+SELECT dbo.GetRackRate(4, '7/1/2017')
+
+GO
+	
+SELECT dbo.GetRackRate(7, '10/31/2017')
 
 GO
 
@@ -470,6 +477,45 @@ AS
 			JOIN Room
 			ON dbo.Folio.RoomID = dbo.Room.RoomID 
 			WHERE FolioID = @FolioID
+			
+			DECLARE BillingDetailsCursor CURSOR FOR
+			SELECT FolioBillingID, FolioID, BillingDescription, BillingAmount, BillingItemQty, BillingItemDate, BillingCatDescription
+			FROM Billing b
+			JOIN BillingCategory bc ON b.BillingCategoryID = bc.BillingCategoryID
+			WHERE b.FolioID = @FolioID
+					
+			DECLARE @FolioBillingID				smallint
+			DECLARE @FolioIDPrint				smallint
+			DECLARE @BillingDescription			varchar(30)
+			DECLARE @BillingAmount				smallmoney
+			DECLARE @BillingItemQty				smallint
+			DECLARE @BillingItemDate			date
+			DECLARE @BillingCatDescription		varchar(200)
+			
+			OPEN BillingDetailsCursor
+			
+			-- Fetch First Time
+			FETCH NEXT FROM BillingDetailsCursor
+			INTO @FolioBillingID, @FolioIDPrint, @BillingDescription, @BillingAmount, @BillingItemQty, @BillingItemDate, @BillingCatDescription
+			
+			WHILE @@FETCH_STATUS = 0
+			BEGIN
+				INSERT INTO @Bill VALUES('Billing Description: ' + @BillingDescription + char(13) + char(10) +
+										 'Billing Amount: ' + CONVERT(varchar, @BillingAmount) + char(13) + char(10) +
+										 'Billing Item Quantity: ' + CONVERT(varchar, @BillingItemQty) + char(13) + char(10) +
+										 'Billing Item Date: ' + CONVERT(varchar, @BillingItemDate, 107) + char(13) + char(10) +
+										 'Billing Category Description: ' + @BillingCatDescription)
+				
+				
+				
+				-- Fetch Again
+				FETCH NEXT FROM BillingDetailsCursor
+				INTO @FolioBillingID, @FolioIDPrint, @BillingDescription, @BillingAmount, @BillingItemQty, @BillingItemDate, @BillingCatDescription
+				
+			END
+			
+			CLOSE BillingDetailsCursor
+			DEALLOCATE BillingDetailsCursor
 			
 			RETURN
 	END
