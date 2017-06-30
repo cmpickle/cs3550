@@ -394,10 +394,6 @@ AS
 	END
 	
 GO
-	
-SELECT dbo.GetRoomTaxRate(RoomID) FROM Room
-
-GO
 
 ----------------------------------------------------------------------------------
 -- #2 - dbo.GetRackRate
@@ -491,6 +487,9 @@ AS
 			DECLARE @BillingItemQty				smallint
 			DECLARE @BillingItemDate			date
 			DECLARE @BillingCatDescription		varchar(200)
+			DECLARE @BillingTotal				smallmoney
+			
+			SET @BillingTotal = 0
 			
 			OPEN BillingDetailsCursor
 			
@@ -501,11 +500,12 @@ AS
 			WHILE @@FETCH_STATUS = 0
 			BEGIN
 				INSERT INTO @Bill VALUES('Billing Description: ' + @BillingDescription + char(13) + char(10) +
-										 'Billing Amount: ' + CONVERT(varchar, @BillingAmount) + char(13) + char(10) +
+										 'Billing Amount: $' + CONVERT(varchar, @BillingAmount) + char(13) + char(10) +
 										 'Billing Item Quantity: ' + CONVERT(varchar, @BillingItemQty) + char(13) + char(10) +
 										 'Billing Item Date: ' + CONVERT(varchar, @BillingItemDate, 107) + char(13) + char(10) +
 										 'Billing Category Description: ' + @BillingCatDescription)
 				
+			SET @BillingTotal = @BillingTotal + (@BillingAmount * @BillingItemQty)
 				
 				
 				-- Fetch Again
@@ -516,6 +516,8 @@ AS
 			
 			CLOSE BillingDetailsCursor
 			DEALLOCATE BillingDetailsCursor
+			
+			INSERT INTO @Bill VALUES('Billing Total: $' + CONVERT(varchar, @BillingTotal))
 			
 			RETURN
 	END
