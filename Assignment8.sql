@@ -653,14 +653,39 @@ GO
 CREATE TRIGGER tr_UpdateFolio ON Folio
 AFTER UPDATE
 AS
-IF UPDATE (Status)
+IF UPDATE (Status) AND (SELECT [Status] FROM inserted) = 'C'
 BEGIN
-	SET NOCOUNT ON
+	DECLARE @ChargePercent smallmoney
+	SET @ChargePercent = 0
+	DECLARE @CancellationDate datetime
+	SET @CancellationDate = GETDATE()
+	DECLARE @FolioID smallint
+	SET @FolioID = (SELECT FolioID FROM inserted)
+	DECLARE @QuotedRate smallmoney
+	SET @QuotedRate = (SELECT QuotedRate FROM inserted)
+	DECLARE @Nights smallint
+	SET @Nights = (SELECT Nights FROM inserted)
+	DECLARE @RoomID smallint
+	SET @RoomID = (SELECT RoomID FROM inserted)
 	
+	IF DATEPART(hh, @CancellationDate) >= 13 AND 
+		DATEPART(hh, @CancellationDate) <= 16
+				SET @ChargePercent = 50
+	ELSE IF DATEPART(hh, @CancellationDate) > 16
+				SET @ChargePercent = 100
 	
-	SELECT @GuestID = (SELECT GuestID FROM inserted) RAISERROR ('The GuestID is invalid', 10, 1, @GuestID)
-	ROLLBACK
+	INSERT INTO Billing VALUES(@FolioID, 1, 'Lodging Billing', @QuotedRate * @Nights + @QuotedRate * @ChargePercent/100, 1, GETDATE())
+	
+	INSERT INTO Billing VALUES(@FolioID, 2, 'Lodging Tax Billing', dbo.GetRoomTaxRate(@RoomID) , 1, GETDATE())
 END
+
+GO
+
+UPDATE Folio SET [Status] = 'C' WHERE FolioID = 2
+
+GO
+
+SELECT * FROM Billing
 
 GO
 
@@ -674,13 +699,13 @@ GO
 CREATE TRIGGER tr_GenerateBill ON Billing
 AFTER INSERT
 AS
-DECLARE @BillingCategoryID smallint
-SET @BillingCategoryID = 2
+DECLARE @FolioID smallint
+SET @FolioID = (SELECT b.FolioID FROM Billing b
+								JOIN inserted i ON b.FolioBillingID = i.FolioBillingID)
 IF EXISTS (SELECT 'value' FROM inserted i
-			JOIN BillingCategory bc ON i.BillingCategoryID = bc.BillingCategoryID
-			WHERE bc.BillingCategoryID = @BillingCategoryID)
+			JOIN Billing b ON i.FolioBillingID = b.FolioBillingID)
 BEGIN
-	SELECT * FROM dbo.ProduceBill(@BillingCategoryID)
+	SELECT * FROM dbo.ProduceBill(@FolioID)
 END
 
 GO
@@ -691,3 +716,5 @@ GO
 
 
 SELECT * FROM Billing
+
+SELECT * FROM BillingCategory
