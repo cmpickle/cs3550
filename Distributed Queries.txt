@@ -1,0 +1,126 @@
+DISTRIBUTED QUERIES AND TRANSACTIONS
+
+You can connect two or more databases (and only one has to be SQL Server) on different servers, using Microsoft's Distributed Transaction Coordinator (MS DTC).
+
+MS DTC uses a two-phase commit protocol to ensure seamless integration between servers
+
+DISTRIBUTED TRANSACTIONS - PREPARE & COMMIT
+
+Prepare Phase:  The transaction manager for the server making the request sends a command to other servers to get them ready.  Note:  the transaction manager for SQL Server is MS DTC.  Other databases will most likely use a different transaction manager.  As the other servers receive the commands, they do whatever is necessary to create the transaction on their end - including ensuring the durability and atomicity of the transaction.  When this is completed, a confirmation or failure message is sent to the originating server.  If any servers fail to respond, they are considered "in doubt".  If any servers are "in doubt" or respond with a failure, then the prepare phase is terminated (or rolled back).
+
+Commit Phase:  Assuming the prepare phase is answered successful by ALL called servers, then the transaction proceeds.  Note:  the remote server must support transactions in order for this to succeed.  DTC will attempt to manage this for you - even if the data source doesn't support it.
+
+DISTRIBUTED QUERIES
+
+Link to another server and reference its objects directly by merely qualifying with a server name.
+Open a query on a linked server, making use of a "pass through" query to avoid certain compatibility issues.
+Open an "ad-hoc" query on the fly - without using a linked server - and join to other query objects.
+1.  CREATING LINKED SERVERS
+
+Execute a special stored procedure called sp_addlinkedserver
+
+In addition to providing a link to the actual server, you must also provide a mapping of that user information to use on the remote server (login and password).  The default is to automatically use the current user and pass to the remote server.
+
+EXAMPLE: 
+
+USE MASTER
+GO
+Exec sp_addlinkedserver
+@server='TITAN',
+@srvproduct='',
+/*this is the product name of the OLE DB data source to add as a linked server.*/
+@provider='MSDASQL',
+@provstr='DRIVER={SQL Server};SERVER=titan.cs.weber.edu,10433;UID=Test_User;PWD=test_password;Initial Catalog=Fry_Hotel' --Note I created this user for my hotel database.
+
+For creating a linked server for Oracle:
+
+USE MASTER
+GO
+EXEC sp_addlinkedserver
+@server = 'TITAN',
+@srvproduct = 'Oracle',
+@provider = 'MSDAORA',
+@datasrc = 'MyServerConnectionString'
+2.  Setting the Linked Server Options
+You can use the sp_serveroption stored procedure to set the options for the linked server.
+
+Exec sp_serveroption
+@server='linked server name',
+@optname='option name' --some important options are give below:
+@optvalue='option value'
+
+The important option names are:
+data access: Enables and disables a linked server for distributed queries.
+Rpc: Enables remote procedure calls from the given server
+Rpc out: Enables rpc to the given server
+Collation Compatible: If this is set to true, SQL Server assumes that all characters in the linked server are compatible with the local server, with regard to the character set and collation sequence.
+Examples:
+Exec sp_serveroption 'TITAN', 'data access', 'true'
+Exec sp_serveroption 'TITAN', 'rpc', 'true'--enables from the REMOTE to LOCAL server
+Exec sp_serveroption 'TITAN', 'rpc out', 'true' -- enables from the LOCAL to REMOTE server
+Exec sp_serveroption 'TITAN', 'collation compatible', 'true'
+
+3.  Creating Logins for the linked Server
+
+Examples:
+1.  Connecting to the linked server using local logins:
+
+Exec sp_addlinkedsrvlogin 'TITAN', 'true'
+2.  Connecting to the linked server using remote userid and password
+
+Exec sp_addlinkedsrvlogin
+@rmtsrvname='TITAN', --this is the name of the linked server
+@useself='false',--True means that sql server logins are used, false means that the rmtuser and rmtpassword are used
+@locallogin='rfry', --login on the local server, default is NULL.
+@rmtuser='Test_User', --name of the remote user
+@rmtpassword='Test_Password' --remote user password
+4.  CREATING PASS THROUGH QUERIES:
+
+Usually used to go directly to the remote server, because syntax may be invalid on local server.
+
+OPENQUERY (<linked server name>, <'query string'>)
+
+EXAMPLE:  SELECT *
+
+FROM OPENQUERY (TITAN, 'Select GuestID FROM Test_Hotel.dbo.Guest') as passthrough
+
+...then you can JOIN these results to your local database by continuing
+
+JOIN Reservations ON passthrough.GuestID = Reservations.GuestID (your local table)
+
+5.  AD HOC QUERIES DIRECTLY
+
+Use primarily like a Pass Through Query, but you also open the connection manually. 
+
+Syntax: 
+
+OPENROWSET (<'Provider Name'>,<'Data Source'>;<'Login ID'>;<'Password'>,<'Provider String'>
+
+Here's an example of connecting to an ACCESS Database...
+
+SELECT CustomerID, CompanyName
+FROM OPENROWSET('Microsoft.Jet.OLEDB.4.0','C:\Program Files\Microsoft Office\OFFICE11\SAMPLES\Northwind.mdb';
+'admin';'',Customers)
+GO
+
+Here is another example for SQL SERVER...
+
+SELECT *
+FROM OPENROWSET('MSDASQL', 'DRIVER={SQL Server};SERVER=titan.cs.weber.edu,10433;UID=Test_User;PWD=Test_Password', 'Select * From Fry_Hotel.dbo.Hotel')
+
+NEW TO SQL 2005:  You must set AD HOC Queries on your LOCAL (outgoing) copy of SQL SERVER.
+
+Run these commands:
+
+sp_configure 'show advanced options', 1
+reconfigure
+go
+
+sp_configure 'Ad Hoc Distributed Queries', 1
+reconfigure
+DISTRIBUTED THINGS TO REMEMBER:
+
+Some activities cannot be done via links.  Primarily DDL commands like (CREATE, ALTER, DROP).
+Collation (case sensitivity) is an issue unless you run EXEC sp_serveroption and set collation "true"
+REMOTE Servers (for replication) can also act as Linked servers, but require EXEC sp_serveroption data access to be set to "true".
+You cannot distribute User Define Functions.

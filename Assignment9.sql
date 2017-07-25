@@ -1,3 +1,5 @@
+-- Distributed Queries Part I
+
 -- Database Creation Script 
 --Cameron Pickle 6/6/2017
 --This creates the FARMS database
@@ -370,10 +372,22 @@ EXEC sp_addlinkedserver
 	@provider = 'MSDASQL',
 	@provstr = 'DRIVER={SQL Server};SERVER=titan.cs.weber.edu,10433;UID=Thai_User;PWD=Thai_Test;Initial Calatog=Pickle_FARMS'
 	
+GO
+	
 Exec sp_serveroption 'TITAN_Pickle', 'data access', 'true'
 Exec sp_serveroption 'TITAN_Pickle', 'rpc', 'true' --enables from the REMOTE to LOCAL server
 Exec sp_serveroption 'TITAN_Pickle', 'rpc out', 'true' --enables from the LOCAL to REMOTE server
 Exec sp_serveroption 'TITAN_Pickle', 'collation compatible', 'true'
+
+GO
+
+Exec sp_configure 'show advanced options', 1
+reconfigure
+
+Exec sp_configure 'Ad Hoc Distributed Queries', 1
+reconfigure
+
+GO
 
 Exec sp_addlinkedsrvlogin
 	@rmtsrvname='TITAN_Pickle', --this is the name of the linked server
@@ -382,9 +396,11 @@ Exec sp_addlinkedsrvlogin
 	@rmtuser='Thai_User', --name of the remote user
 	@rmtpassword='Thai_Test' --remote user password
 	
---Exec sp_addlinkedsrvlogin 'TITAN_Pickle', 'true'
+GO
 
 USE Pickle_FARMS
+
+GO
 
 ----------------------------------------------------------------------------------
 -- A9 #5 - Query the Thai_HOBS database
@@ -416,14 +432,91 @@ GO
 
 -- Part A
 
+-- check to see if sp_InsertGuest exists
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_NAME= 'sp_InsertGuest_Pickle')
+	DROP PROCEDURE sp_InsertGuest_Pickle;
+GO
 
-
-JOIN Reservation ON passthrough GuestID = ReservationID
-
-SELECT * 
-FROM OPENROWSET('MSDASQL', 'DRIVER={SQL Server};SERVER=titan.cs.weber.edu,10433;UID=Test_User;PWD=Test_Password','Select * From Pickle_FARMS.dbo.Hotel')
+-- create procedure
+CREATE PROCEDURE sp_InsertGuest_Pickle
+	@GuestFirst			varchar(20),
+	@GuestLast			varchar(20),
+	@GuestAddress1		varchar(30),
+	@GuestCity			varchar(20),
+	@GuestPostalCode	varchar(10),
+	@GuestID			smallint OUTPUT
+AS
+BEGIN
+INSERT INTO TITAN_Pickle.Thai_HOBS.dbo.Guests (GuestFirstName, GuestLastName, GuestAddress, GuestCity, GuestPostalCode)
+	VALUES(
+		@GuestFirst, 
+		@GuestLast, 
+		@GuestAddress1, 
+		@GuestCity, 
+		@GuestPostalCode)
+		
+	SELECT @GuestID = @@IDENTITY
+	
+END
 
 GO
 
-sp_configure 'Ad Hoc Distribued Queries', 1
-reconfigure
+-- Part B - test by adding myself
+DECLARE @NewGuestID smallint
+
+EXEC sp_InsertGuest_Pickle
+	@GuestFirst			= 'Cameron',
+	@GuestLast			= 'Pickle',
+	@GuestAddress1		= '4037 Yorkshire Dr',
+	@GuestCity			= 'South Jordan',
+	@GuestPostalCode	= '84009',
+	@GuestID			= @NewGuestID OUTPUT
+	
+PRINT 'New Guest ID for assigned is ' + CONVERT(varchar(10), @NewGuestID)
+	
+GO
+
+SELECT * FROM OPENQUERY(TITAN_Pickle, 'SELECT * FROM Thai_HOBS.dbo.Guests')
+
+GO
+
+----------------------------------------------------------------------------------
+-- A9 #7 - Union with remote DB
+----------------------------------------------------------------------------------
+
+SELECT * FROM OPENQUERY(TITAN_Pickle, 'SELECT HotelName ''Property Name'', RoomType ''Room Type'', ''$'' + CONVERT(varchar(12), RoomRackRate) ''Rate'' 
+										FROM Thai_HOBS.dbo.Rooms r 
+										JOIN Thai_HOBS.dbo.Hotels h 
+										ON r.HotelNO = h.HotelNo')
+										UNION
+										SELECT h.HotelName 'Property Name', rt.RTDescription 'Room Type', '$' + CONVERT(varchar(12), rr.RackRate) 'Rate' 
+										FROM Room r
+										JOIN RoomType rt 
+										ON r.RoomTypeID = rt.RoomTypeID
+										JOIN RackRate rr
+										ON rt.RoomTypeID = rr.RoomTypeID
+										JOIN Hotel h
+										ON rr.HotelID = h.HotelID
+										WHERE '7/1/2017' BETWEEN RackRateBegin AND RackRateEnd
+
+----------------------------------------------------------------------------------
+-- A9 #8 - OpenRowSet
+----------------------------------------------------------------------------------
+
+SELECT * 
+FROM OPENROWSET('MSDASQL', 
+				'DRIVER={SQL Server};SERVER=titan.cs.weber.edu,10433;UID=Thai_User;PWD=Thai_Test',
+				'SELECT BookingID ''ReservationID'', GuestLastName ''Guest Last Name'', ''$'' + CONVERT(varchar(12), CAST(ROUND(QuotedRate/35.69, 2) as numeric(36,2))) ''Quoted Rate'', CONVERT(varchar(20),CheckInDate, 107) ''Check-in Date'' 
+				FROM Bookings b
+				JOIN Guests g
+				ON b.GuestNo = g.GuestNo')
+				UNION
+				Select f.ReservationID 'ReservationID', GuestLast 'Guest Last Name', '$' + CONVERT(varchar(12), QuotedRate) 'Quoted Rate', CONVERT(varchar(20),CheckInDate, 107) 'Check-in Date' 
+				From Folio f
+				JOIN Reservation r
+				ON f.ReservationID = r.ReservationID
+				JOIN CreditCard cc
+				ON r.CreditCardID = cc.CreditCardID
+				JOIN Guest g
+				ON cc.GuestID = g.GuestID
+				ORDER BY 'Guest Last Name'
