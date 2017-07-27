@@ -650,7 +650,7 @@ IF EXISTS (SELECT name FROM sys.objects WHERE name = N'tr_UpdateFolio')
 	DROP TRIGGER tr_UpdateFolio
 GO
 
-ALTER TRIGGER tr_UpdateFolio ON Folio
+CREATE TRIGGER tr_UpdateFolio ON Folio
 AFTER UPDATE
 AS
 IF UPDATE (Status) AND (SELECT [Status] FROM inserted) = 'C'
