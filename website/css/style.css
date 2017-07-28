@@ -5,3 +5,7 @@ body {
 .entryHeader {
   font-size: 1.5em;
 }
+
+ul.otherScripts li {
+  font-size: 2em;
+}
