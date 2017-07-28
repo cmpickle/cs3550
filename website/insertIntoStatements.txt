@@ -1,0 +1,38 @@
+INSERT INTO Restaurant (RestaurantName, HotelID, RestaurantDescription, RestaurantRating)
+VALUES	('The Flaming Iguana', 2100, 'A bright lively atmosphere. The Flaming Iguana is known for it''s fire dancers who entertain guests as they eat their meals.', 7),
+		('The Tavern', 2200, 'A rowdy restaurant that is themed to the old west. Watch out for the bandit that romes this town.', 6),
+		('Cafeteria Land', 2300, 'Do you miss the day of school cafeterias? Well no longer my friend Cafeteria Land is the place for you!', 2),
+		('Mr Jimmies', 2400, 'Take a break and slow down for a relaxing meal at Mr Jimmies. It''s a nice calm restaurants with all your favorite meals!', 5);
+
+INSERT INTO Reservation (ReservationDateTime, RestaurantID, CustomerID, ReservationStatus)
+VALUES	('2017-7-28 18-30-00', 2100, 1, 'R'),
+		('2017-7-28 17-30-00', 2200, 2, 'R'),
+		('2017-6-13 17-30-00', 2200, 3, 'R'),
+		('2017-8-23 17-30-00', 2200, 3, 'R'),
+		('2017-10-12 17-30-00', 2200, 4, 'R'),
+		('2017-11-16 17-30-00', 2200, 5, 'R'),
+		('2017-12-8 17-30-00', 2200, 6, 'R'),
+		('2018-3-4 17-30-00', 2200, 7, 'R'),
+		('2017-5-2 17-30-00', 2200, 8, 'R'),
+		('2017-7-14 17-30-00', 2200, 9, 'R'),
+		('2017-6-24 17-30-00', 2200, 10, 'R'),
+		('2017-9-9 17-30-00', 2200, 4, 'R'),
+		('2017-9-11 17-30-00', 2200, 2, 'R'),
+		('2017-11-11 17-30-00', 2200, 8, 'R'),
+		('2017-12-25 17-30-00', 2200, 9, 'R'),
+		('2017-8-15 17-30-00', 2200, 5, 'R');
+
+INSERT INTO Customer(CustomerFirst, CustomerLast, CustomerEmail, CustomerPhone)
+VALUES	()
+
+INSERT INTO Orders (OrderDetailID, ReservationID, OrderTime, OrderActive)
+VALUES	()
+
+INSERT INTO Billing (OrderID, BillAmount)
+VALUES	()
+
+INSERT INTO OrderItem (ItemID, OrderID, ItemQuantity)
+VALUES	()
+
+INSERT INTO MenuItem (ItemName, ItemDescription, ItemRating, ItemType)
+VALUES	()
