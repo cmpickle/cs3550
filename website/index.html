@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Pickle Final Project Restaurant Database</title>
+
+<!-- 
+Author: Cameron Pickle
+-->
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="description" content="Documents the Pickle FARMS Restaurants database" />
+<meta name="keywords" content="Restaurant, Food, Menu, Documentation, database" />
+<meta name="author" content="Cameron Pickle" />
+
+<!--<link rel="stylesheet" href="css/style.css" />-->
+<link rel="stylesheet" href="css/style.css" />
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+</head>
+
+<body> 
+  		<nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Pickle Database</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#projectOverview">Project Overview</a></li>
+            <li><a href="#dataSpecifications">Data Specifications</a></li>
+            <li><a href="#otherScripts">Other Scripts</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+			 <div class="container">
+				 			<div class="jumbotron">
+    			 				 <h1>Pickle Restaurant Database Documentation</h1>
+        					 <p>This is a template showcasing the optional theme stylesheet included in Bootstrap. Use it as a starting point to create something more unique by building on or modifying it.</p>
+      				</div>
+							
+							<div class="page-header" id="projectOverview">
+      			 		<h2>Project Overview</h2>
+							</div>
+    			 		<p>This database is for the FARMS Restaurants. Each FARMS hotel has a restaurant in it that customers may make reservations to dine at. The restaurant wants to link up its FARMS hotel database to its FARMS restaurant database so that each restaurant that is in a hotel might be linked to that hotel through the databases.</p>
+    					<p>The FARMS restaurant database will include their Billing, Menu, Reservation, Customer, Order, and restaurants. I will have the following business logic enforced upon the database.</p>
+							
+    			 
+							<div class="page-header" id="dataSpecifications">
+    			 					<h2>Data Specifications Overview</p>
+							</div>
+    								<h3>Business Rules Satisfied By ERD And DB Constraints</h3>
+    			 					<p>List business rules satisfied by the ERD</p>
+    								
+    								<img src="img/schema.jpg" class="img-responsive img-rounded" alt="Restaurant database schema">
+    								
+      							<h3>Business Rules Satisfied By Triggers</h3>
+    								
+    								<div class="entry bg-info">
+      								<p class="entryHeader">tr_CustomerIDMustExist</p>
+      								<p>Type: On Insert - After</p>
+      								<p>Description: A reservation must have a valid customerID associated with it.</p>
+    								</div>
+    								
+    								<div class="entry bg-info">
+      								<p class="entryHeader">tr_UpdateReservation</p>
+      								<p>Type: On Update - After</p>
+      								<p>Description: If a reservation is cancelled then cancellation fees must be applied automatically if applicable.</p>
+    								</div>
+    								
+    								<div class="entry bg-info">
+      								<p class="entryHeader">tr_GenerateBill</p>
+      								<p>Type: On Insert - After</p>
+      								<p>Description: When an order is created generate a bill for the customer.</p>
+    								</div>
+    								
+    								<div class="entry bg-info">
+      								<p class="entryHeader">tr_InsertOrderItem</p>
+      								<p>Type: On Insert - Instead Of</p>
+      								<p>Description: If the quantity of an order item is zero or less replace it with a 1.</p>
+    								</div>
+    								
+    								<h3>Business Rules Satisfied by Stored Procedures</h3>
+    								
+    								<div class="entry bg-info">
+      								<p class="entryHeader">GetMenu(HotelID)</p>
+      								<p>Description: Gets the taxes for an order</p>
+      								<p>Input Parameters: HotelID</p>
+      								<p>Output Parameters: HotelID</p>
+    								</div>
+    								
+    								<div class="entry bg-info">
+      								<p class="entryHeader">ProduceBill(CustomerID)</p>
+      								<p>Description: Creates a bill for a given customer</p>
+      								<p>Input Parameters: CustomerID</p>
+      								<p>Output Parameters: HotelID</p>
+    								</div>
+    								
+    								<div class="entry bg-info">
+      								<p class="entryHeader">CalculateNightlyEarnings(RestaurantID)</p>
+      								<p>Description: Calculates how much money the restaurant has made for a given night</p>
+      								<p>Input Parameters: RestaurantID</p>
+      								<p>Output Parameters: HotelID</p>
+    								</div>
+    								
+    								<div class="entry bg-info">
+      								<p class="entryHeader">CalculateCancellationFees(ReservationID)</p>
+      								<p>Description: Calculates the cancellation fee for a customer</p>
+      								<p>Input Parameters: RestaurantID</p>
+      								<p>Output Parameters: HotelID</p>
+    								</div>
+    								
+    								<div class="entry bg-info">
+      								<p class="entryHeader">GetActiveOrders(RestaurantID)</p>
+      								<p>Description: Gets the schedule for a given employee</p>
+      								<p>Input Parameters: RestaurantID</p>
+      								<p>Output Parameters: HotelID</p>
+    								</div>
+    								
+    								<div class="entry bg-info">
+      								<p class="entryHeader">GetReservedSeats(RestaurantID)</p>
+      								<p>Description: Finds which seats are reserved at a given restaurant</p>
+      								<p>Input Parameters: RestaurantID</p>
+      								<p>Output Parameters: HotelID</p>
+    								</div>
+    								
+    								<h3>Business Rules Satisfied By User Defined Functions</h3>
+    								
+    								<div class="entry bg-info">
+      								<p class="entryHeader">InsertCustomer(CustomerID, CustomerFirst, CustomerLast, CustomerEmail)</p>
+      								<p>Description: Inserts a customer row to the Customer table</p>
+      								<p>Input Parameters: RestaurantID</p>
+      								<p>Returns:</p>
+    								</div>
+    								
+    								<div class="entry bg-info">
+      								<p class="entryHeader">InsertReservation(ReservationTime, RestaurantID, CustomerID)</p>
+      								<p>Description: Creates a new reservation</p>
+      								<p>Input Parameters: RestaurantID</p>
+      								<p>Returns:</p>
+    								</div>
+    								
+    								<div class="entry bg-info">
+      								<p class="entryHeader">InsertMenuItem(ItemID, ItemName, ItemDescription, ItemPrice, ItemCategory)</p>
+      								<p>Description: Inserts a menu into the Menu table</p>
+      								<p>Input Parameters: RestaurantID</p>
+      								<p>Returns:</p>
+    								</div>
+    								
+    								<div class="entry bg-info">
+      								<p class="entryHeader">InsertOrder(OrderID, CustomerID, OrderMenuItems, OrderDate, RestaurantID)</p>
+      								<p>Description: Inserts a menu into the Menu table</p>
+      								<p>Input Parameters: RestaurantID</p>
+      								<p>Returns:</p>
+    								</div>
+    								
+    								<div class="entry bg-info">
+      								<p class="entryHeader">UpdatePrices(MenuItemID)</p>
+      								<p>Description: Updates the prices of food on the Menu table</p>
+      								<p>Input Parameters: RestaurantID</p>
+      								<p>Returns:</p>
+    								</div>
+    								
+    								<div class="entry bg-info">
+      								<p class="entryHeader">UpdateReservationStatus(ReservationID, ReservationStatus)</p>
+      								<p>Description: Updates the status of a reservation</p>
+      								<p>Input Parameters: RestaurantID</p>
+      								<p>Returns:</p>
+    								</div>
+    								
+							<div class="page-header" id="otherScripts">
+    								<h2>Other Scripts</h2>
+							</div>
+    								
+    			 </section>
+			 </div>
+</body>
+</html>

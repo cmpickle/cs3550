@@ -1,0 +1,149 @@
+header,footer,article,section,hgroup,nav{
+  background-color: grey;
+	padding: 20px;
+	margin: 20px;
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
+	border-radius:10px;
+	width: 100%;
+
+	-moz-box-shadow: 10px 10px 5px black;
+	-webkit-box-shadow: 10px 10px 5px black;
+	box-shadow: 10px 10px 5px black;
+}
+
+header{
+	text-align: center;
+}
+
+.center{
+	text-align: center;
+}
+
+.title {
+	font-size: 2em;
+}
+
+nav{
+  background-color: #eeeeee;
+	padding:0 10px;
+	text-align: center;
+	border:10px solid #eeeeee;
+}
+
+nav a,nav a:visited{
+	color:blue;
+	text-shadow:0 1px 1px black;
+	text-transform:uppercase;
+	text-decoration: none;
+	padding: 1px;
+}
+
+nav a:hover{
+	text-decoration:none;
+	background-color:orange;
+	padding: 1px;
+}
+
+nav, article, nav a,figure{
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
+	border-radius:10px;
+}
+
+h1, h2, h3, h4, h5, h6{
+  color:white;
+	text-shadow: 0 3px 3px black;
+	font-family: Diavlo, arial, sans-serif;
+	font-size:2em;
+}
+
+h1, h2{
+	color: orange;
+}
+
+h1 a, h2 a, h3 a, h4 a, tr td a, ul li a{
+	color: white;
+	text-decoration: underline;
+}
+
+h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover, tr td a:hover, ul li a:hover{
+	color: blue;
+	text-decoration: underline;
+}
+
+h1 a:active, h2 a:active, h3 a:active, h4 a:active, tr td a:active, ul li a:active{
+	color: orange;
+	text-decoration: underline;
+}
+
+a:not([href]), a:hover:not([href]){
+	color: white;
+	text-decoration: none;
+}
+
+body{
+  background-color:#555555;
+  width: 95%;
+	max-width: 1024px;
+	min-width: 500px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+p, figcaption, label, ul, blockquote, address{
+  color: white;
+	text-align: left;
+	text-shadow:0 1px 1px black;
+	font-size:1.5em;
+}
+
+figcaption{
+  width: 240px;
+	font-size: .7em;
+	text-align: center;
+}
+
+tr td{
+  text-align: left;
+	vertical-align:top;
+}
+
+.resumeHeaderLeft{
+	text-align: right;
+}
+
+tbody:before{
+	content: "\200c";
+	display: block;
+	line-height: 2em;
+}
+
+.cite{
+	text-align: right;
+}
+
+.image{
+	max-width:100%;
+	max-height:100%;
+}
+
+.clearFix{
+	overflow: auto;
+}
+
+@font-face {
+    font-family: 'Diavlo';
+    src: url('../fonts/Diavlo.eot');
+    src: url('../fonts/Diavlo.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/Diavlo.woff') format('woff'),
+         url('../fonts/Diavlo.ttf') format('truetype');
+}
+
+.entryHeader {
+  font-size: 2em;
+}
+
+.entry {
+  margin: 60px 30px 60px 30px;
+}
