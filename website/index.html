@@ -27,27 +27,27 @@ Author: Cameron Pickle
 </head>
 
 <body> 
-  		<nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">Pickle Database</a>
+      		<nav class="navbar navbar-inverse navbar-fixed-top">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="#">Pickle Database</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Home</a></li>
+                <li><a href="#projectOverview">Project Overview</a></li>
+                <li><a href="#dataSpecifications">Data Specifications</a></li>
+                <li><a href="#otherScripts">Other Scripts</a></li>
+              </ul>
+            </div><!--/.nav-collapse -->
         </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
-            <li><a href="#projectOverview">Project Overview</a></li>
-            <li><a href="#dataSpecifications">Data Specifications</a></li>
-            <li><a href="#otherScripts">Other Scripts</a></li>
-          </ul>
-        </div><!--/.nav-collapse -->
-      </div>
-    </nav>
+      </nav>
 			 <div class="container">
 				 			<div class="jumbotron">
     			 				 <h1>Pickle Restaurant Database Documentation</h1>
@@ -76,25 +76,25 @@ Author: Cameron Pickle
 										</div>
     								
     								<div class="entry bg-info">
-      								<p class="entryHeader">tr_CustomerIDMustExist</p>
+      								<p class="entryHeader"><a href="">tr_CustomerIDMustExist</a></p>
       								<p>Type: On Insert - After</p>
       								<p>Description: A reservation must have a valid customerID associated with it.</p>
     								</div>
     								
     								<div class="entry bg-info">
-      								<p class="entryHeader">tr_UpdateReservation</p>
+      								<p class="entryHeader"><a href="">tr_UpdateReservation</a></p>
       								<p>Type: On Update - After</p>
       								<p>Description: If a reservation is cancelled then cancellation fees must be applied automatically if applicable.</p>
     								</div>
     								
     								<div class="entry bg-info">
-      								<p class="entryHeader">tr_GenerateBill</p>
+      								<p class="entryHeader"><a href="">tr_GenerateBill</a></p>
       								<p>Type: On Insert - After</p>
       								<p>Description: When an order is created generate a bill for the customer.</p>
     								</div>
     								
     								<div class="entry bg-info">
-      								<p class="entryHeader">tr_InsertOrderItem</p>
+      								<p class="entryHeader"><a href="">tr_InsertOrderItem</a></p>
       								<p>Type: On Insert - Instead Of</p>
       								<p>Description: If the quantity of an order item is zero or less replace it with a 1.</p>
     								</div>
@@ -104,42 +104,42 @@ Author: Cameron Pickle
 										</div>
     								
     								<div class="entry bg-info">
-      								<p class="entryHeader">GetMenu(HotelID)</p>
+      								<p class="entryHeader"><a href="">GetMenu(HotelID)</a></p>
       								<p>Description: Gets the taxes for an order</p>
       								<p>Input Parameters: HotelID</p>
       								<p>Output Parameters: HotelID</p>
     								</div>
     								
     								<div class="entry bg-info">
-      								<p class="entryHeader">ProduceBill(CustomerID)</p>
+      								<p class="entryHeader"><a href="">ProduceBill(CustomerID)</a></p>
       								<p>Description: Creates a bill for a given customer</p>
       								<p>Input Parameters: CustomerID</p>
       								<p>Output Parameters: HotelID</p>
     								</div>
     								
     								<div class="entry bg-info">
-      								<p class="entryHeader">CalculateNightlyEarnings(RestaurantID)</p>
+      								<p class="entryHeader"><a href="">CalculateNightlyEarnings(RestaurantID)</a></p>
       								<p>Description: Calculates how much money the restaurant has made for a given night</p>
       								<p>Input Parameters: RestaurantID</p>
       								<p>Output Parameters: HotelID</p>
     								</div>
     								
     								<div class="entry bg-info">
-      								<p class="entryHeader">CalculateCancellationFees(ReservationID)</p>
+      								<p class="entryHeader"><a href="">CalculateCancellationFees(ReservationID)</a></p>
       								<p>Description: Calculates the cancellation fee for a customer</p>
       								<p>Input Parameters: RestaurantID</p>
       								<p>Output Parameters: HotelID</p>
     								</div>
     								
     								<div class="entry bg-info">
-      								<p class="entryHeader">GetActiveOrders(RestaurantID)</p>
+      								<p class="entryHeader"><a href="">GetActiveOrders(RestaurantID)</a></p>
       								<p>Description: Gets the schedule for a given employee</p>
       								<p>Input Parameters: RestaurantID</p>
       								<p>Output Parameters: HotelID</p>
     								</div>
     								
     								<div class="entry bg-info">
-      								<p class="entryHeader">GetReservedSeats(RestaurantID)</p>
+      								<p class="entryHeader"><a href="">GetReservedSeats(RestaurantID)</a></p>
       								<p>Description: Finds which seats are reserved at a given restaurant</p>
       								<p>Input Parameters: RestaurantID</p>
       								<p>Output Parameters: HotelID</p>
@@ -150,42 +150,42 @@ Author: Cameron Pickle
 										</div>
     								
     								<div class="entry bg-info">
-      								<p class="entryHeader">InsertCustomer(CustomerID, CustomerFirst, CustomerLast, CustomerEmail)</p>
+      								<p class="entryHeader"><a href="">InsertCustomer(CustomerID, CustomerFirst, CustomerLast, CustomerEmail)</a></p>
       								<p>Description: Inserts a customer row to the Customer table</p>
       								<p>Input Parameters: RestaurantID</p>
       								<p>Returns:</p>
     								</div>
     								
     								<div class="entry bg-info">
-      								<p class="entryHeader">InsertReservation(ReservationTime, RestaurantID, CustomerID)</p>
+      								<p class="entryHeader"><a href="">InsertReservation(ReservationTime, RestaurantID, CustomerID)</a></p>
       								<p>Description: Creates a new reservation</p>
       								<p>Input Parameters: RestaurantID</p>
       								<p>Returns:</p>
     								</div>
     								
     								<div class="entry bg-info">
-      								<p class="entryHeader">InsertMenuItem(ItemID, ItemName, ItemDescription, ItemPrice, ItemCategory)</p>
+      								<p class="entryHeader"><a href="">InsertMenuItem(ItemID, ItemName, ItemDescription, ItemPrice, ItemCategory)</a></p>
       								<p>Description: Inserts a menu into the Menu table</p>
       								<p>Input Parameters: RestaurantID</p>
       								<p>Returns:</p>
     								</div>
     								
     								<div class="entry bg-info">
-      								<p class="entryHeader">InsertOrder(OrderID, CustomerID, OrderMenuItems, OrderDate, RestaurantID)</p>
+      								<p class="entryHeader"><a href="">InsertOrder(OrderID, CustomerID, OrderMenuItems, OrderDate, RestaurantID)</a></p>
       								<p>Description: Inserts a menu into the Menu table</p>
       								<p>Input Parameters: RestaurantID</p>
       								<p>Returns:</p>
     								</div>
     								
     								<div class="entry bg-info">
-      								<p class="entryHeader">UpdatePrices(MenuItemID)</p>
+      								<p class="entryHeader"><a href="">UpdatePrices(MenuItemID)</a></p>
       								<p>Description: Updates the prices of food on the Menu table</p>
       								<p>Input Parameters: RestaurantID</p>
       								<p>Returns:</p>
     								</div>
     								
     								<div class="entry bg-info">
-      								<p class="entryHeader">UpdateReservationStatus(ReservationID, ReservationStatus)</p>
+      								<p class="entryHeader"><a href="">UpdateReservationStatus(ReservationID, ReservationStatus)</a></p>
       								<p>Description: Updates the status of a reservation</p>
       								<p>Input Parameters: RestaurantID</p>
       								<p>Returns:</p>
@@ -196,8 +196,8 @@ Author: Cameron Pickle
 							</div>
 							
 							<ul class="otherScripts">
-									<li><a href="creationScript.txt">Creation Script</a></li>
-									<li><a href="insertIntoStatements.txt">Insert Into Statements With Sample Data</a></li>
+									<li><a href="otherscripts/creationScript.html">Creation Script</a></li>
+									<li><a href="otherscripts/insertScript.html">Insert Into Statements With Sample Data</a></li>
 							</ul>
     								
     			 </section>
