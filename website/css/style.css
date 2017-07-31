@@ -11,10 +11,12 @@ ul.otherScripts li {
   font-size: 2em;
 }
 
-	
-	
-
-
+a.anchor {
+    display: block;
+    position: relative;
+    top: -65px;
+    visibility: hidden;
+}
 	
 	/* re-factor the existing styles so that the layout 
 	   is on the inner code element rather than the outer pre, 
