@@ -110,12 +110,6 @@ Author: Cameron Pickle
       								<p>Type: On Insert - After</p>
       								<p>Description: When an order is set to not active generate a bill for the customer. When the OrderActive bit is set to 0 the trigger will call the GenerateBill UDF and display it for the user.</p>
     								</div>
-                    
-                    <div class="entry bg-info">
-                      <p class="entryHeader"><a href="trigger/tr_generatebill.html">tr_GenerateBill</a></p>
-                      <p>Type: On Insert - After</p>
-                      <p>Description: When an order is set to not active generate a bill for the customer. When the OrderActive bit is set to 0 the trigger will call the GenerateBill UDF and display it for the user.</p>
-                    </div>
     								
     								<div class="entry bg-info">
       								<p class="entryHeader"><a href="trigger/tr_insertorderitem.html">tr_InsertOrderItem</a></p>
@@ -129,29 +123,53 @@ Author: Cameron Pickle
                     
                     <ul>
                       <li>The restaurant must be able to insert customers</li>
+                      <li>The restaurant must be able to create reservations</li>
+                      <li>The restaurant must be able to add menu items</li>
+                      <li>The restaurant be able to create new orders</li>
                       <li>The restaurant must be able to adjust the prices of menu items</li>
                       <li>The restaurant must be able to update reservation statuses</li>
                     </ul>
                     
                     <div class="entry bg-info">
-                      <p class="entryHeader"><a href="sproc/sp_insertcustomer.html">InsertCustomer(CustomerFirst, CustomerLast, CustomerEmail, CustomerPhone)</a></p>
-                      <p>Description: Inserts a customer row to the Customer table. All the customer data entered into the stored procedure will be inserted as the new customer's info.</p>
+                      <p class="entryHeader"><a href="">InsertCustomer(CustomerID, CustomerFirst, CustomerLast, CustomerEmail)</a></p>
+                      <p>Description: Inserts a customer row to the Customer table</p>
                       <p>Input Parameters: RestaurantID</p>
-                      <p>Output Parameters:</p>
+                      <p>Returns:</p>
                     </div>
                     
                     <div class="entry bg-info">
-                      <p class="entryHeader"><a href="sproc/sp_updateprices.html">UpdatePrices(PercentageChange, MenuItemID = 0)</a></p>
-                      <p>Description: Updates the prices of food on the Menu table. If no MenuItemID is entered or is set to 0 then all menu items will be affected. The price will increase if the percentage is positive and it will decrease if it is negative. It will throw an exception if the MenuItemID doesn't exist.</p>
+                      <p class="entryHeader"><a href="">InsertReservation(ReservationTime, RestaurantID, CustomerID)</a></p>
+                      <p>Description: Creates a new reservation</p>
                       <p>Input Parameters: RestaurantID</p>
-                      <p>Output Parameters:</p>
+                      <p>Returns:</p>
                     </div>
                     
                     <div class="entry bg-info">
-                      <p class="entryHeader"><a href="sproc/sp_updatereservationstatus.html">UpdateReservationStatus(ReservationID, ReservationStatus)</a></p>
-                      <p>Description: Updates the status of a reservation<. This procedure only updates the reservation status column of the Reservation table. It is used to change the current status of a reservation. It will throw an exception if on of the valid reservation statuses are not used or if the ReservationID doesn't exist.</p>
+                      <p class="entryHeader"><a href="">InsertMenuItem(ItemID, ItemName, ItemDescription, ItemPrice, ItemCategory)</a></p>
+                      <p>Description: Inserts a menu into the Menu table</p>
                       <p>Input Parameters: RestaurantID</p>
-                      <p>Output Parameters:</p>
+                      <p>Returns:</p>
+                    </div>
+                    
+                    <div class="entry bg-info">
+                      <p class="entryHeader"><a href="">InsertOrder(OrderID, CustomerID, OrderMenuItems, OrderDate, RestaurantID)</a></p>
+                      <p>Description: Inserts a menu into the Menu table</p>
+                      <p>Input Parameters: RestaurantID</p>
+                      <p>Returns:</p>
+                    </div>
+                    
+                    <div class="entry bg-info">
+                      <p class="entryHeader"><a href="">UpdatePrices(MenuItemID)</a></p>
+                      <p>Description: Updates the prices of food on the Menu table</p>
+                      <p>Input Parameters: RestaurantID</p>
+                      <p>Returns:</p>
+                    </div>
+                    
+                    <div class="entry bg-info">
+                      <p class="entryHeader"><a href="">UpdateReservationStatus(ReservationID, ReservationStatus)</a></p>
+                      <p>Description: Updates the status of a reservation</p>
+                      <p>Input Parameters: RestaurantID</p>
+                      <p>Returns:</p>
                     </div>
     								
     								<div class="page-header">
@@ -161,40 +179,56 @@ Author: Cameron Pickle
                     <ul>
                       <li>The restaurant must be able to get a menu for a given hotel</li>
                       <li>The restaurant must be able to produce a bill for a customer</li>
-                      <li>The restaurant must be able to calculate total earnings for the day</li>
+                      <li>The restaurant must be able to calculate total earnings for a night</li>
                       <li>The restaurant must be able to calculate the cancellation fees</li>
+                      <li>The restaurant must be able to get the current active orders</li>
+                      <li>The restaurant must be able to get a list of the currently reserved seats</li>
                     </ul>
                     
                     <div class="entry bg-info">
-                      <p class="entryHeader"><a href="udf/getmenu.html">GetMenu(RestaurantID)</a></p>
-                      <p>Description: Gets the menu for a given hotel. All of the menu items that are associated with the given RestaurantID will be returned in a table. If the Restaurant ID is invalid then an error message will be returned in the table.</p>
-                      <p>Input Parameters: RestaurantID</p>
-                      <p>Returns: Hotel's Menu</p>
+                      <p class="entryHeader"><a href="">GetMenu(HotelID)</a></p>
+                      <p>Description: Gets the menu for a given hotel.</p>
+                      <p>Input Parameters: HotelID</p>
+                      <p>Output Parameters: HotelID</p>
                     </div>
                     
                     <div class="entry bg-info">
-                      <p class="entryHeader"><a href="udf/producebill.html">ProduceBill(OrderID)</a></p>
-                      <p>Description: Creates a bill for a given order. The UDF will use a cursor to loop through all of the order's menu items and create a bill. If the order ID is invalid a error message will be returned.</p>
-                      <p>Input Parameters: OrderID</p>
-                      <p>Returns: Customer's Bill</p>
+                      <p class="entryHeader"><a href="">ProduceBill(CustomerID)</a></p>
+                      <p>Description: Creates a bill for a given customer</p>
+                      <p>Input Parameters: CustomerID</p>
+                      <p>Output Parameters: HotelID</p>
                     </div>
                     
                     <div class="entry bg-info">
-                      <p class="entryHeader"><a href="udf/calculatedailyearnings.html">CalculateDailyEarnings(RestaurantID, Date)</a></p>
+                      <p class="entryHeader"><a href="">CalculateDailyEarnings(RestaurantID, Date)</a></p>
                       <p>Description: Calculates how much money the restaurant has made for a given night. The stored procedure will use a cursor to loop through all of the reservations for a given restaurant and determine how much money the restaurant will make for the given day.</p>
                       <p>Input Parameters: RestaurantID, Date</p>
-                      <p>Returns: Restaurant's Earnings</p>
+                      <p>Output Parameters: RestaurantEarnings</p>
                     </div>
                     
                     <div class="entry bg-info">
-                      <p class="entryHeader"><a href="udf/calculatecancellationfee.html">CalculateCancellationFee(ReservationID)</a></p>
-                      <p>Description: Calculates the cancellation fee for a reservation. If the reservation is cancelled less than two days before then there is a $30 cancellation fee. If the reservation is cancelled two to four days out there will be a $15 cancellation fee. If the Reservation ID doesn't exist then an error message will be returned.</p>
+                      <p class="entryHeader"><a href="">CalculateCancellationFees(ReservationID)</a></p>
+                      <p>Description: Calculates the cancellation fee for a reservation. If the reservation is cancelled less than two days before then there is a $30 cancellation fee. If the reservation is cancelled two to four days out there will be a $15 cancellation fee.</p>
                       <p>Input Parameters: ReservationID</p>
-                      <p>Returns: CancellationFee</p>
+                      <p>Output Parameters: CancellationFee</p>
+                    </div>
+                    
+                    <div class="entry bg-info">
+                      <p class="entryHeader"><a href="">GetActiveOrders(RestaurantID)</a></p>
+                      <p>Description: Gets all of the active orders for a given restaurant.</p>
+                      <p>Input Parameters: RestaurantID</p>
+                      <p>Output Parameters: NULL</p>
+                    </div>
+                    
+                    <div class="entry bg-info">
+                      <p class="entryHeader"><a href="">GetReservedSeats(RestaurantID)</a></p>
+                      <p>Description: Finds which seats are reserved at a given restaurant.</p>
+                      <p>Input Parameters: RestaurantID</p>
+                      <p>Output Parameters: HotelID</p>
                     </div>
                     
                     <div class="page-header">
-                         <h3>Business Rules Satisfied By Distributed Queries</h3>
+                         <h3>Business Rules Satisfied By Distribued Queries</h3>
                     </div>
                     
                     <ul>
@@ -203,16 +237,16 @@ Author: Cameron Pickle
                     </ul>
                     
                     <div class="entry bg-info">
-                      <p class="entryHeader"><a href="distributedqueries/sp_addbilltofarms.html">AddBillToFARMS(OrderID)</a></p>
-                      <p>Description: Adds the customer's restuarant bill to their account on the FARMS database. A linked server is used to make a query on the FARMS database that inserts the customer's bill into the FARMS database using their data from the Restaurant database. An error is returned if the reservation ID doesn't exist or if the customer doesn't exist in the FARMS database.</p>
-                      <p>Input Parameters: OrderID</p>
+                      <p class="entryHeader"><a href="">AddBillToFARMS(ReservationID)</a></p>
+                      <p>Description: Adds the customer's restuarant bill to their account on the FARMS database.</p>
+                      <p>Input Parameters: RestaurantID</p>
                       <p>Returns:</p>
                     </div>
                     
                     <div class="entry bg-info">
-                      <p class="entryHeader"><a href="distributedqueries/sp_retrievecustomerfromfarms.html">RetrieveCustomerFromFARMS(CustomerID)</a></p>
-                      <p>Description: Retrieves a customer form the FARMS database and inserts it into the Restaurant database. The cusomers then are able to make reservations in the Restaurant database. An error is returned if the customer ID doesn't exist.</p>
-                      <p>Input Parameters: CustomerID</p>
+                      <p class="entryHeader"><a href="">RetrieveCustomerFromFARMS(CustomerID)</a></p>
+                      <p>Description: Retrieves a customer form the FARMS database and inserts it into the Restaurant database.</p>
+                      <p>Input Parameters: RestaurantID</p>
                       <p>Returns:</p>
                     </div>
     								
