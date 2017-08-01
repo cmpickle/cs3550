@@ -49,9 +49,17 @@ Author: Cameron Pickle
     </div>
   </nav>
 	<div class="container">
-    <pre><code><samp>
-      
-    </samp></code></pre>
+    <pre><code><samp>----------------------------------------------------------------------------------
+-- tr_InsertOrderItem
+----------------------------------------------------------------------------------
+CREATE TRIGGER tr_InsertOrderItem BEFORE INSERT ON OrderItem
+BEGIN
+  IF EXISTS (SELECT ItemQuantity FROM inserted)
+  
+  INSERT INTO OrderItem
+  SELECT i.OrderItemID, i.ItemID, i.OrderID, 1
+  FROM inserted i
+END</samp></code></pre>
 	</div>
 
 

@@ -49,9 +49,18 @@ Author: Cameron Pickle
     </div>
   </nav>
 	<div class="container">
-    <pre><code><samp>
-      
-    </samp></code></pre>
+    <pre><code><samp>----------------------------------------------------------------------------------
+-- tr_GenerateBill
+----------------------------------------------------------------------------------
+CREATE TRIGGER tr_GenerateBill AFTER INSERT ON Billing
+DECLARE @OrderID smallint
+SET @OrderID = (SELECT b.OrderID FROM Billing b
+                JOIN inserted i ON b.FolioBillingID = i.FolioBillingID)
+IF EXISTS (SELECT 'value' FROM inserted i
+      JOIN Billing b ON i.BillID = b.BillID)
+BEGIN
+  SELECT * FROM dbo.ProduceBill(@OrderID)
+END</samp></code></pre>
 	</div>
 
 

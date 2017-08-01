@@ -49,9 +49,20 @@ Author: Cameron Pickle
     </div>
   </nav>
 	<div class="container">
-    <pre><code><samp>
-      
-    </samp></code></pre>
+    <pre><code><samp>----------------------------------------------------------------------------------
+-- tr_CustomerIDMustExist
+----------------------------------------------------------------------------------
+CREATE TRIGGER tr_CustomerIDMustExist AFTER INSERT ON Reservation
+FOR EACH ROW
+DECLARE @CustomerID smallint
+IF NOT EXISTS (SELECT 'value'
+        FROM inserted i
+        JOIN Customer g ON i.CustomerID = g.CustomerID)
+BEGIN
+  SET @errormsg = ("" + CONVERT(varchar, @CustomerID) + " is not a valid customer ID. Please enter a valid customer ID.")
+  RAISERROR (@errormsg, 1, 1, @CustomerID)
+  ROLLBACK
+END</samp></code></pre>
 	</div>
 
 
