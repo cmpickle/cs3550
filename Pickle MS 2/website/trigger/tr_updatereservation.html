@@ -5,7 +5,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Pickle Restaurant sp_AddBillToFARMS</title>
+<title>Pickle Restaurant tr_UpdateReservation</title>
 
 <!-- 
 Author: Cameron Pickle
@@ -50,22 +50,33 @@ Author: Cameron Pickle
   </nav>
 	<div class="container">
     <pre><code><samp>----------------------------------------------------------------------------------
--- sp_AddBillToFARMS(OrderID)
+-- tr_UpdateReservation
 ----------------------------------------------------------------------------------
-CREATE PROCEDURE sp_AddBillToFARMS
-  IN OrderID  smallint
+CREATE TRIGGER tr_UpdateReservation AFTER UPDATE ON Reservation
+IF UPDATE (ReservationStatus) AND (SELECT [ReservationStatus] FROM inserted) = 'X'
 BEGIN
-INSERT INTO TITAN_Pickle.Pickle_FARMS.dbo.Billing (GuestFirstName, GuestLastName, GuestAddress, GuestCity, GuestPostalCode)
-  VALUES(
-    @FolioID, 
-    @BillingCategoryID,
-    @BillingDescription,
-    @BillingAmount,
-    @BillingItemQty,
-    @BillintItemDate)
+  DECLARE @ChargeAmount Decimal(10,4)
+  SET @ChargeAmount = 0
+  DECLARE @CancellationDate datetime
+  SET @CancellationDate = GETDATE()
+  DECLARE @ReservationID smallint
+  SET @ReservationID = (SELECT ReservationID FROM inserted)
+  DECLARE @QuotedRate Decimal(10,4)
+  SET @QuotedRate = (SELECT QuotedRate FROM inserted)
+  DECLARE @Nights smallint
+  SET @Nights = (SELECT Nights FROM inserted)
+  DECLARE @RoomID smallint
+  SET @RoomID = (SELECT RoomID FROM inserted)
   
+  IF DATEPART(hh, @CancellationDate) >= 2 AND 
+    DATEPART(hh, @CancellationDate) <= 4
+        SET @ChargeAmount = 15
+  ELSE IF DATEPART(hh, @CancellationDate) > 4
+        SET @ChargeAmount = 30
+  
+  INSERT INTO Billing VALUES(OrderID, @ChargeAmount)
 END</samp></code></pre>
-  </div>
+	</div>
 
 
   <script type="text/JavaScript">

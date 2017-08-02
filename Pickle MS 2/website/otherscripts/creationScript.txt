@@ -1,0 +1,137 @@
+-- Database Creation Script 
+-- Cameron Pickle 7/19/2017
+-- This creates the FARMS Restaurant database
+-- Uses MySQL database
+
+DROP DATABASE IF EXISTS Pickle_Restaurant;
+
+CREATE DATABASE Pickle_Restaurant;
+
+-- With the Pickle_Restaurant database now created, switch to it and begin creating the individual 
+-- tables for the database
+
+USE Pickle_Restaurant;
+
+CREATE TABLE Restaurant
+(
+    RestaurantID 			SMALLINT		NOT NULL	AUTO_INCREMENT, 
+    RestaurantName 			VARCHAR(20)		NOT NULL, 
+    HotelID 				SMALLINT		NOT NULL, 
+    RestaurantDescription 	VARCHAR(200)	NOT NULL, 
+    RestaurantRating 		SMALLINT		NULL,
+    PRIMARY KEY(RestaurantID)
+);
+
+CREATE TABLE Reservation
+(
+    ReservationID			SMALLINT		NOT NULL AUTO_INCREMENT,
+    ReservationDateTime		DATETIME		NOT NULL,
+    RestaurantID			SMALLINT		NOT NULL,
+    CustomerID				SMALLINT		NOT NULL,
+    ReservationStatus		CHAR(1)			NOT NULL,
+    PRIMARY KEY(ReservationID)
+);
+
+CREATE TABLE Customer
+(
+    CustomerID			SMALLINT		NOT NULL	AUTO_INCREMENT,
+    CustomerFirst		VARCHAR(20)		NOT NULL,
+    CustomerLast		VARCHAR(20)		NOT NULL,
+    CustomerEmail		VARCHAR(50)		NULL,
+    CustomerPhone		VARCHAR(15)		NULL,
+    PRIMARY KEY(CustomerID)
+);
+
+CREATE TABLE Orders
+(
+    OrderID			SMALLINT		NOT NULL	AUTO_INCREMENT,
+    OrderDetailID	SMALLINT		NOT NULL,
+    ReservationID	SMALLINT		NOT NULL,
+    OrderTime		TIME			NOT NULL,
+    OrderActive		BIT				NOT NULL,
+    PRIMARY KEY(OrderID)
+);
+
+CREATE TABLE Billing
+(
+    BillingID		SMALLINT		NOT NULL	AUTO_INCREMENT,
+    OrderID			SMALLINT		NOT NULL,
+    BillAmount		DECIMAL(10,2)	NOT NULL,
+    BillPaid		BIT				NOT NULL,
+    PRIMARY KEY(BillingID)
+);
+
+CREATE TABLE OrderItem
+(
+    OrderItemID		SMALLINT		NOT NULL	AUTO_INCREMENT,
+    ItemID			SMALLINT		NOT NULL,
+    OrderID			SMALLINT		NOT NULL,
+    ItemQuantity	TINYINT			NOT NULL,
+    PRIMARY KEY(OrderItemID)
+);
+
+CREATE TABLE MenuItem
+(
+    ItemID			SMALLINT		NOT NULL	AUTO_INCREMENT,
+    ItemName		VARCHAR(20)		NOT NULL,
+    ItemCost		DECIMAL(10,4)	NOT NULL,
+    ItemDescription	VARCHAR(200)	NOT NULL,
+    RestaurantID	SMALLINT		NOT NULL,
+    ItemType		VARCHAR(20)		NULL,
+    PRIMARY KEY(ItemID)
+);
+
+-- Alter the tables where autoincrement starts at a specific value 
+ALTER TABLE Restaurant
+	AUTO_INCREMENT = 5000;
+    
+-- Alter tables to set up foreign keys 
+ALTER TABLE Reservation
+	ADD CONSTRAINT fk_restaurant_id
+    FOREIGN KEY (RestaurantID) REFERENCES Restaurant(RestaurantID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
+    
+ALTER TABLE Reservation
+    ADD CONSTRAINT fk_customer_id
+    FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
+
+ALTER TABLE Orders
+	ADD CONSTRAINT fk_reservation_id
+    FOREIGN KEY (ReservationID) REFERENCES Reservation(ReservationID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
+    
+ALTER TABLE Billing
+	ADD CONSTRAINT fk_order_id_billing
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
+    
+ALTER TABLE OrderItem
+	ADD CONSTRAINT fk_item_id
+    FOREIGN KEY (ItemID) REFERENCES MenuItem(ItemID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
+    
+ALTER TABLE OrderItem
+	ADD CONSTRAINT fk_order_id_orderitem
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
+
+
+-- Add defaults
+ALTER TABLE Customer
+	ALTER CustomerFirst SET DEFAULT 'John';
+    
+ALTER TABLE Customer
+	ALTER CustomerLast SET DEFAULT 'Smith';
+    
+ALTER TABLE OrderItem
+	ALTER ItemQuantity SET DEFAULT 1;
+    
+ALTER TABLE Orders
+	ALTER OrderActive SET DEFAULT 1;

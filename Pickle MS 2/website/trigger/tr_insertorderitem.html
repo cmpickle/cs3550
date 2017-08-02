@@ -5,7 +5,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Pickle Restaurant sp_AddBillToFARMS</title>
+<title>Pickle Restaurant tr_InsertOrderItem</title>
 
 <!-- 
 Author: Cameron Pickle
@@ -50,22 +50,17 @@ Author: Cameron Pickle
   </nav>
 	<div class="container">
     <pre><code><samp>----------------------------------------------------------------------------------
--- sp_AddBillToFARMS(OrderID)
+-- tr_InsertOrderItem
 ----------------------------------------------------------------------------------
-CREATE PROCEDURE sp_AddBillToFARMS
-  IN OrderID  smallint
+CREATE TRIGGER tr_InsertOrderItem BEFORE INSERT ON OrderItem
 BEGIN
-INSERT INTO TITAN_Pickle.Pickle_FARMS.dbo.Billing (GuestFirstName, GuestLastName, GuestAddress, GuestCity, GuestPostalCode)
-  VALUES(
-    @FolioID, 
-    @BillingCategoryID,
-    @BillingDescription,
-    @BillingAmount,
-    @BillingItemQty,
-    @BillintItemDate)
+  IF EXISTS (SELECT ItemQuantity FROM inserted)
   
+  INSERT INTO OrderItem
+  SELECT i.OrderItemID, i.ItemID, i.OrderID, 1
+  FROM inserted i
 END</samp></code></pre>
-  </div>
+	</div>
 
 
   <script type="text/JavaScript">

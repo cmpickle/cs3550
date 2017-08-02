@@ -5,7 +5,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Pickle Restaurant sp_AddBillToFARMS</title>
+<title>Pickle Restaurant tr_ReferencialIntegrity</title>
 
 <!-- 
 Author: Cameron Pickle
@@ -50,22 +50,14 @@ Author: Cameron Pickle
   </nav>
 	<div class="container">
     <pre><code><samp>----------------------------------------------------------------------------------
--- sp_AddBillToFARMS(OrderID)
+-- tr_ReferencialIntegrity
 ----------------------------------------------------------------------------------
-CREATE PROCEDURE sp_AddBillToFARMS
-  IN OrderID  smallint
+CREATE TRIGGER tr_ReferencialIntegrity AFTER INSERT ON Restaurant
+DECLARE @RestaurantID smallint
 BEGIN
-INSERT INTO TITAN_Pickle.Pickle_FARMS.dbo.Billing (GuestFirstName, GuestLastName, GuestAddress, GuestCity, GuestPostalCode)
-  VALUES(
-    @FolioID, 
-    @BillingCategoryID,
-    @BillingDescription,
-    @BillingAmount,
-    @BillingItemQty,
-    @BillintItemDate)
-  
+  Maintian the integrity..
 END</samp></code></pre>
-  </div>
+	</div>
 
 
   <script type="text/JavaScript">

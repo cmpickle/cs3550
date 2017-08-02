@@ -5,7 +5,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Pickle Restaurant sp_AddBillToFARMS</title>
+<title>Pickle Restaurant tr_CustomerIDMustExist</title>
 
 <!-- 
 Author: Cameron Pickle
@@ -50,22 +50,20 @@ Author: Cameron Pickle
   </nav>
 	<div class="container">
     <pre><code><samp>----------------------------------------------------------------------------------
--- sp_AddBillToFARMS(OrderID)
+-- tr_CustomerIDMustExist
 ----------------------------------------------------------------------------------
-CREATE PROCEDURE sp_AddBillToFARMS
-  IN OrderID  smallint
+CREATE TRIGGER tr_CustomerIDMustExist AFTER INSERT ON Reservation
+FOR EACH ROW
+DECLARE @CustomerID smallint
+IF NOT EXISTS (SELECT 'value'
+        FROM inserted i
+        JOIN Customer g ON i.CustomerID = g.CustomerID)
 BEGIN
-INSERT INTO TITAN_Pickle.Pickle_FARMS.dbo.Billing (GuestFirstName, GuestLastName, GuestAddress, GuestCity, GuestPostalCode)
-  VALUES(
-    @FolioID, 
-    @BillingCategoryID,
-    @BillingDescription,
-    @BillingAmount,
-    @BillingItemQty,
-    @BillintItemDate)
-  
+  SET @errormsg = ("" + CONVERT(varchar, @CustomerID) + " is not a valid customer ID. Please enter a valid customer ID.")
+  RAISERROR (@errormsg, 1, 1, @CustomerID)
+  ROLLBACK
 END</samp></code></pre>
-  </div>
+	</div>
 
 
   <script type="text/JavaScript">
