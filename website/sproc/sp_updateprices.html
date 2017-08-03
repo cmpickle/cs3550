@@ -52,18 +52,19 @@ Author: Cameron Pickle
     <pre><code><samp>----------------------------------------------------------------------------------
 -- sp_UpdatePrices(PercentageChange, ItemID = 0)
 ----------------------------------------------------------------------------------
-CREATE PROCEDURE sp_UpdatePrices
-  IN ItemID          smallint,
-  IN Percentchange   smallint = NULL
+DELIMITER //
+CREATE PROCEDURE sp_UpdatePrices(
+    IN PercentChange SMALLINT,
+    IN ItemID SMALLINT
+)
 BEGIN
-  update price by percentage
-
-  if ItemID = 0:
-    only update where item ID = ItemID
-  else:
-    update all item prices by PercentageChange
-
-END</samp></code></pre>
+  IF @ItemID = 0 THEN
+    UPDATE MenuItem SET ItemCost = ItemCost * (1+CONVERT(@PercentageChange/100, Decimal));
+  else
+    UPDATE MenuItem SET ItemCost = ItemCost * (1+CONVERT(@PercentageChange/100, Decimal)) WHERE ItemID = @ItemID;
+  END IF;
+END//
+DELIMITER ;</samp></code></pre>
   </div>
 
 

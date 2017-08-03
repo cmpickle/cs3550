@@ -52,17 +52,17 @@ Author: Cameron Pickle
     <pre><code><samp>----------------------------------------------------------------------------------
 -- tr_CustomerIDMustExist
 ----------------------------------------------------------------------------------
+DELIMITER //
 CREATE TRIGGER tr_CustomerIDMustExist AFTER INSERT ON Reservation
 FOR EACH ROW
-DECLARE @CustomerID smallint
-IF NOT EXISTS (SELECT 'value'
-        FROM inserted i
-        JOIN Customer g ON i.CustomerID = g.CustomerID)
 BEGIN
-  SET @errormsg = ("" + CONVERT(varchar, @CustomerID) + " is not a valid customer ID. Please enter a valid customer ID.")
-  RAISERROR (@errormsg, 1, 1, @CustomerID)
-  ROLLBACK
-END</samp></code></pre>
+      DECLARE CustomerID SMALLINT;
+    IF NEW.CustomerID NOT IN (SELECT c.CustomerID FROM Reservation r JOIN Customer c ON r.CustomerID = c.CustomerID WHERE c.CustomerID = NEW.CustomerID) THEN
+            SET CustomerID = (SELECT CustomerID FROM Customer WHERE Customer.CustomerID = NEW.CustomerID);
+      SIGNAL SQLSTATE VALUE '02026'
+          SET MESSAGE_TEXT = " is not a valid customer ID. Please enter a valid customer ID.";
+    END IF;
+END //</samp></code></pre>
 	</div>
 
 

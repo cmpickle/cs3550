@@ -53,24 +53,23 @@ Author: Cameron Pickle
 -- sp_InsertCustomer(CustomerFirst, CustomerLast, CustomerEmail, CustomerPhone)
 ----------------------------------------------------------------------------------
 
--- create procedure
-CREATE PROCEDURE sp_InsertCustomer
-  @CustomerFirst     varchar(20),
-  @CustomerLast      varchar(20),
-  @CustomerEmail     varchar(50),
-  @CustomerPhone     varchar(15),
-  @CustomerID        smallint OUTPUT
-AS
+DELIMITER //
+CREATE PROCEDURE sp_InsertCustomer(
+  IN CustomerFirst     varchar(20),
+  IN CustomerLast      varchar(20),
+  IN CustomerEmail     varchar(50),
+  IN CustomerPhone     varchar(15),
+  OUT CustomerID        smallint)
 BEGIN
-INSERT INTO Customer (CustomerFirst, CustomerLast, CustomerEmail, CustomerPhone)
-  VALUES(
-    @CustomerFirst,
-    @CustomerLast,
-    @CustomerEmail,
-    @CustomerPhone)
+    INSERT INTO Customer (CustomerFirst, CustomerLast, CustomerEmail, CustomerPhone)
+      VALUES(
+        CustomerFirst,
+        CustomerLast,
+        CustomerEmail,
+        CustomerPhone
+      );
     
-  SELECT @CustomerID = @@IDENTITY
-  
+    SET CustomerID = LAST_INSERT_ID();
 END</samp></code></pre>
 	</div>
 

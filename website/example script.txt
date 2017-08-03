@@ -1,0 +1,9 @@
+-- Triggers
+INSERT INTO reservation(reservationdatetime, restaurantid, customerid, reservationstatus) VALUES('2017-08-02 17:30:00', 2000, 10, 'R')
+
+INSERT INTO orderitem(ItemID, OrderID, ItemQuantity) VALUES(1, 2, 0);
+
+-- Stored Proceedures
+call sp_InsertCustomer('Cameron', 'Pickle', 'cmpickle@gmail.com', '8016948594', @customerID)
+
+call sp_UpdatePrices(11, 1) 

@@ -52,14 +52,15 @@ Author: Cameron Pickle
     <pre><code><samp>----------------------------------------------------------------------------------
 -- tr_InsertOrderItem
 ----------------------------------------------------------------------------------
+DELIMITER //
 CREATE TRIGGER tr_InsertOrderItem BEFORE INSERT ON OrderItem
+FOR EACH ROW
 BEGIN
-  IF EXISTS (SELECT ItemQuantity FROM inserted)
   
-  INSERT INTO OrderItem
-  SELECT i.OrderItemID, i.ItemID, i.OrderID, 1
-  FROM inserted i
-END</samp></code></pre>
+    IF (SELECT ItemQuantity FROM OrderItem oi WHERE oi.OrderItemID = NEW.OrderItemID) < 1 THEN
+            INSERT INTO orderitem(OrderItemID, ItemID, OrderID, ItemQuantity) VALUES(NEW.OrderItemID, NEW.ItemID, OrderID, 1);
+    END IF;
+END //</samp></code></pre>
 	</div>
 
 
