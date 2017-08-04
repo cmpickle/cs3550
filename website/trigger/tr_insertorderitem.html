@@ -49,9 +49,10 @@ Author: Cameron Pickle
     </div>
   </nav>
 	<div class="container">
-    <pre><code><samp>----------------------------------------------------------------------------------
+    <pre><code><samp>-- --------------------------------------------------------------------------------
 -- tr_InsertOrderItem
-----------------------------------------------------------------------------------
+-- --------------------------------------------------------------------------------
+
 DELIMITER //
 CREATE TRIGGER tr_InsertOrderItem BEFORE INSERT ON OrderItem
 FOR EACH ROW
@@ -60,7 +61,8 @@ BEGIN
     IF (SELECT ItemQuantity FROM OrderItem oi WHERE oi.OrderItemID = NEW.OrderItemID) < 1 THEN
             INSERT INTO orderitem(OrderItemID, ItemID, OrderID, ItemQuantity) VALUES(NEW.OrderItemID, NEW.ItemID, OrderID, 1);
     END IF;
-END //</samp></code></pre>
+END //
+DELIMITER ;</samp></code></pre>
 	</div>
 
 

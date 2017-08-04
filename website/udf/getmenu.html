@@ -49,19 +49,19 @@ Author: Cameron Pickle
     </div>
   </nav>
 	<div class="container">
-    <pre><code><samp>----------------------------------------------------------------------------------
--- dbo.GetMenu(RestaurantID)
-----------------------------------------------------------------------------------
-CREATE FUNCTION dbo.GetRoomTaxRate
-  (
-  @RoomID smallint
-  )
-RETURNS table
-  BEGIN
-      DECLARE @result table
-      SET @result = ( SELECT MenuItem WHERE RestaurantID = @RestaurantID)
-  RETURN @result
-  END</samp></code></pre>
+    <pre><code><samp>-- --------------------------------------------------------------------------------
+-- sp_GetMenu(RestaurantID)
+-- --------------------------------------------------------------------------------
+
+DELIMITER //
+CREATE PROCEDURE sp_GetMenu
+(
+  RestaurantIDin  smallint
+)
+BEGIN
+    SELECT * FROM menuitem WHERE restaurantID = RestaurantIDin;
+END //
+DELIMITER ;</samp></code></pre>
 	</div>
 
 

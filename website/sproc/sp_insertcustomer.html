@@ -49,9 +49,9 @@ Author: Cameron Pickle
     </div>
   </nav>
 	<div class="container">
-    <pre><code><samp>----------------------------------------------------------------------------------
+    <pre><code><samp>-- --------------------------------------------------------------------------------
 -- sp_InsertCustomer(CustomerFirst, CustomerLast, CustomerEmail, CustomerPhone)
-----------------------------------------------------------------------------------
+-- --------------------------------------------------------------------------------
 
 DELIMITER //
 CREATE PROCEDURE sp_InsertCustomer(
@@ -70,7 +70,8 @@ BEGIN
       );
     
     SET CustomerID = LAST_INSERT_ID();
-END</samp></code></pre>
+END //
+DELIMITER ;</samp></code></pre>
 	</div>
 
 

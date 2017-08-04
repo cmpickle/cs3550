@@ -49,19 +49,19 @@ Author: Cameron Pickle
     </div>
   </nav>
   <div class="container">
-    <pre><code><samp>----------------------------------------------------------------------------------
--- sp_UpdatePrices(PercentageChange, ItemID = 0)
-----------------------------------------------------------------------------------
+    <pre><code><samp>-- --------------------------------------------------------------------------------
+-- sp_UpdatePrices(PercentChange, ItemID = 0)
+-- --------------------------------------------------------------------------------
 DELIMITER //
 CREATE PROCEDURE sp_UpdatePrices(
-    IN PercentChange SMALLINT,
+    IN PercentChange DOUBLE(10,4),
     IN ItemID SMALLINT
 )
 BEGIN
-  IF @ItemID = 0 THEN
-    UPDATE MenuItem SET ItemCost = ItemCost * (1+CONVERT(@PercentageChange/100, Decimal));
+  IF ItemID = 0 THEN
+    UPDATE MenuItem SET ItemCost = ItemCost * (1+CONVERT(PercentChange/100, Decimal(10,4)));
   else
-    UPDATE MenuItem SET ItemCost = ItemCost * (1+CONVERT(@PercentageChange/100, Decimal)) WHERE ItemID = @ItemID;
+    UPDATE MenuItem SET ItemCost = ItemCost * (1+CONVERT(PercentChange/100, Decimal(10,4))) WHERE ItemID = ItemID;
   END IF;
 END//
 DELIMITER ;</samp></code></pre>

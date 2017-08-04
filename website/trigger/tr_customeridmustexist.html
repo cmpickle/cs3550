@@ -49,9 +49,10 @@ Author: Cameron Pickle
     </div>
   </nav>
 	<div class="container">
-    <pre><code><samp>----------------------------------------------------------------------------------
+    <pre><code><samp>-- --------------------------------------------------------------------------------
 -- tr_CustomerIDMustExist
-----------------------------------------------------------------------------------
+-- --------------------------------------------------------------------------------
+
 DELIMITER //
 CREATE TRIGGER tr_CustomerIDMustExist AFTER INSERT ON Reservation
 FOR EACH ROW
@@ -62,7 +63,8 @@ BEGIN
       SIGNAL SQLSTATE VALUE '02026'
           SET MESSAGE_TEXT = " is not a valid customer ID. Please enter a valid customer ID.";
     END IF;
-END //</samp></code></pre>
+END //
+DELIMITER ;</samp></code></pre>
 	</div>
 
 

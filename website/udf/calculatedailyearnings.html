@@ -49,25 +49,38 @@ Author: Cameron Pickle
     </div>
   </nav>
 	<div class="container">
-    <pre><code><samp>----------------------------------------------------------------------------------
+    <pre><code><samp>-- --------------------------------------------------------------------------------
 -- dbo.CalculateDailyEarnings(RestaurantID, date)
-----------------------------------------------------------------------------------
+-- --------------------------------------------------------------------------------
+
+DELIMITER //
 CREATE FUNCTION dbo.CalculateDailyEarnings
-  (
-  @RestaurantID smallint,
-  @Date         date
-  )
+(
+  RestaurantIDin smallint,
+  Date         date
+)
 RETURNS decimal(4,2)
-AS
   BEGIN
-      DECLARE @result decimal(4,2)
-      SET @result = 0
+      DECLARE orderCursor CURSOR FOR 
+      (SELECT BillAmount FROM billing b JOIN Orders o ON b.OrderID = o.OrderID JOIN reservation r ON o.ReservationID = r.ReservationID JOIN restaurant rest ON r.RestaurantID = rest.RestaurantID WHERE rest.RestaurantID = RestaurantIDin);
+      
+      -- declare a NOT FOUND handler
+      
+      SET @result = 0;
+      
+      OPEN orderCursor;
+      
+      DECLARE t_cost SMALLINT;
+      
+      FETCH orderCursor INTO t_cost;
+      
+      set @result += @result + t_cost;
+      
+      CLOSE orderCursor;
 
-      use a cursor to loop through all of the bills for a given restaurant for @Date
-
-      SET @result += ( SELECT Billing FROM Billing JOIN Order JOIN Reservation WHERE RestaurantID = @RestaurantID)
   RETURN @result
-  END</samp></code></pre>
+END //
+DELIMITER ;</samp></code></pre>
 	</div>
 
 
