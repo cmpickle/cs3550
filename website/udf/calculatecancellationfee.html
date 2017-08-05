@@ -49,35 +49,29 @@ Author: Cameron Pickle
     </div>
   </nav>
 	<div class="container">
-    <pre><code><samp>----------------------------------------------------------------------------------
--- dbo.CalculateCancellationFee(ReservationID)
-----------------------------------------------------------------------------------
-CREATE FUNCTION dbo.CalculateCancellationFees 
-  (
-  @ReservationID smallint,
-  @CancellationDate date
-  )
-RETURNS @Cancellation TABLE
+    <pre><code><samp>-- ----------------------------------------------------------------------------
+-- CalculateCancellationFee(ReservationID)
+-- --------------------------------------------------------------------------------
+
+DELIMITER //
+CREATE FUNCTION CalculateCancellationFees 
 (
-  ReservationID smallint,
-  [Cancellation Charge] smallmoney
+  ReservationIDin smallint,
+  CancellationDate date
 )
-  BEGIN
-    DECLARE @ChargeAmount Decimal(10,4)
-    SET @ChargeAmount = 0
-    IF DATEDIFF(dd, @CancellationDate, (SELECT CheckinDate FROM Reservation WHERE ReservationID = @ReservationID))<=4 AND 
-       DATEDIFF(dd, @CancellationDate, (SELECT CheckinDate FROM Reservation WHERE ReservationID = @ReservationID))>=2
-        SET @ChargeAmount = 15
-    ELSE IF DATEDIFF(dd, @CancellationDate, (SELECT CheckinDate FROM Reservation WHERE ReservationID = @ReservationID))<=2
-        SET @ChargeAmount = 30
+RETURNS DECIMAL(10,4)
+BEGIN
+  SET @ChargeAmount = 0.00;
+  SET @ChargeAmount = 0;
+  IF ((DATEDIFF(CancellationDate, (SELECT ReservationDateTime FROM Reservation WHERE ReservationID = ReservationIDin))<=4) AND (DATEDIFF(CancellationDate, (SELECT ReservationDateTime FROM Reservation WHERE ReservationID = ReservationIDin))>=2)) THEN
+      SET @ChargeAmount = 15;
+  ELSEIF (DATEDIFF(CancellationDate, (SELECT ReservationDateTime FROM Reservation WHERE ReservationID = ReservationIDin))<=2) THEN
+      SET @ChargeAmount = 30;
+  END IF;
   
-    INSERT INTO @Cancellation
-    SELECT ReservationID, CAST(QuotedRate*@ChargeAmount/100 * dbo.GetRoomTaxRate(RoomID)/100 AS DECIMAL(5,2))  AS 'Cancellation Charge'
-    FROM dbo.Reservation
-    WHERE dbo.Reservation.ReservationID = @ReservationID
-    
-    RETURN
-  END</samp></code></pre>
+  RETURN @ChargeAmount;
+END //
+DELIMITER ;</samp></code></pre>
 	</div>
 
 

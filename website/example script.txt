@@ -8,3 +8,13 @@ call sp_InsertCustomer('Cameron', 'Pickle', 'cmpickle@gmail.com', '8016948594', 
 
 call sp_UpdatePrices(11, 1) 
 call sp_UpdatePrices(-11, 0) 
+
+call sp_GetMenu(2000);
+
+CALL sp_ReservationStatus(1, 'X');
+
+
+-- User Defined Functions
+SELECT CalculateDailyEarnings(5000, '2017-07-28')
+
+SELECT CalculateCancellationFees(5, '2017-08-04')

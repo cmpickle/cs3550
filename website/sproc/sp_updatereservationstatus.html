@@ -49,18 +49,20 @@ Author: Cameron Pickle
     </div>
   </nav>
   <div class="container">
-    <pre><code><samp>----------------------------------------------------------------------------------
+    <pre><code><samp>-- ----------------------------------------------------------------------------
 -- sp_UpdateReservationStatus(ReservationID, ReservationStatus)
-----------------------------------------------------------------------------------
-CREATE PROCEDURE sp_UpdatePrices
-  IN ReservationID          smallint,
-  IN ReservationStatus      smallint
+-- --------------------------------------------------------------------------------
+
+DELIMITER //
+CREATE PROCEDURE sp_ReservationStatus 
+(
+  IN ReservationIDin          smallint,
+  IN ReservationStatusin      smallint
+)
 BEGIN
-  update Reservation on the Status column only to Reservation status
-
-  only update where the reservation ID = ReservationID
-
-END</samp></code></pre>
+  UPDATE Reservation SET ReservationStatus = ReservationStatusin WHERE ReservationID = ReservationIDin;
+END //
+DELIMITER ;</samp></code></pre>
   </div>
 
 

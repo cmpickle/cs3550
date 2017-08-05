@@ -50,35 +50,45 @@ Author: Cameron Pickle
   </nav>
 	<div class="container">
     <pre><code><samp>-- --------------------------------------------------------------------------------
--- dbo.CalculateDailyEarnings(RestaurantID, date)
+-- CalculateDailyEarnings(RestaurantID, date)
 -- --------------------------------------------------------------------------------
 
 DELIMITER //
-CREATE FUNCTION dbo.CalculateDailyEarnings
+CREATE FUNCTION CalculateDailyEarnings
 (
   RestaurantIDin smallint,
-  Date         date
+  Datein         date
 )
 RETURNS decimal(4,2)
-  BEGIN
+BEGIN
+      DECLARE v_finished INTEGER DEFAULT 0;
+      DECLARE t_cost DECIMAL(10,4);
+      
       DECLARE orderCursor CURSOR FOR 
-      (SELECT BillAmount FROM billing b JOIN Orders o ON b.OrderID = o.OrderID JOIN reservation r ON o.ReservationID = r.ReservationID JOIN restaurant rest ON r.RestaurantID = rest.RestaurantID WHERE rest.RestaurantID = RestaurantIDin);
+      (SELECT BillAmount FROM billing b JOIN Orders o ON b.OrderID = o.OrderID JOIN reservation r ON o.ReservationID = r.ReservationID JOIN restaurant rest ON r.RestaurantID = rest.RestaurantID WHERE rest.RestaurantID = RestaurantIDin AND DATE(ReservationDateTime) = Datein);
       
-      -- declare a NOT FOUND handler
+      DECLARE CONTINUE HANDLER
+      FOR NOT FOUND SET v_finished = 1;
       
+            
       SET @result = 0;
       
       OPEN orderCursor;
-      
-      DECLARE t_cost SMALLINT;
+      get_amount: LOOP
       
       FETCH orderCursor INTO t_cost;
       
-      set @result += @result + t_cost;
+      IF v_finished = 1 THEN
+      LEAVE get_amount;
+      END IF;
+      
+      set @result = @result + t_cost;
+      
+      END LOOP get_amount;
       
       CLOSE orderCursor;
 
-  RETURN @result
+  RETURN @result;
 END //
 DELIMITER ;</samp></code></pre>
 	</div>

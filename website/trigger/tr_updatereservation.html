@@ -49,12 +49,15 @@ Author: Cameron Pickle
     </div>
   </nav>
 	<div class="container">
-    <pre><code><samp>----------------------------------------------------------------------------------
+    <pre><code><samp>-- ----------------------------------------------------------------------------
 -- tr_UpdateReservation
-----------------------------------------------------------------------------------
+-- --------------------------------------------------------------------------------
+
+DELIMITER //
 CREATE TRIGGER tr_UpdateReservation AFTER UPDATE ON Reservation
-IF UPDATE (ReservationStatus) AND (SELECT [ReservationStatus] FROM inserted) = 'X'
+FOR EACH ROW
 BEGIN
+  IF UPDATE (ReservationStatus) AND (SELECT [ReservationStatus] FROM inserted) = 'X' THEN
   DECLARE @ChargeAmount Decimal(10,4)
   SET @ChargeAmount = 0
   DECLARE @CancellationDate datetime
@@ -75,7 +78,8 @@ BEGIN
         SET @ChargeAmount = 30
   
   INSERT INTO Billing VALUES(OrderID, @ChargeAmount)
-END</samp></code></pre>
+END
+DELIMITER ;</samp></code></pre>
 	</div>
 
 

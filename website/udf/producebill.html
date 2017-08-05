@@ -49,63 +49,67 @@ Author: Cameron Pickle
     </div>
   </nav>
 	<div class="container">
-    <pre><code><samp>CREATE FUNCTION dbo.ProduceBill
-  (
-  @OrderID smallint
-  )
-RETURNS @Bill TABLE
+    <pre><code><samp>-- --------------------------------------------------------------------------------
+-- ProduceBill(OrderID)
+-- --------------------------------------------------------------------------------
+
+DELIMITER //
+CREATE FUNCTION ProduceBill
 (
-  [Info] varchar(max)
+  OrderIDin smallint
 )
-AS
-  BEGIN
-      INSERT INTO @Bill
-      SELECT 'Customer Name: ' + CustomerFirst + ' ' + CustomerLast + char(13) + char(10) + 
-          'Email: ' + CustomerEmail + CHAR(13) + CHAR(10) + 
-          'Phone Number: ' + CustomerPhone + CHAR(13) + CHAR(10)
-      FROM dbo.Customer c
-      JOIN Reservation r
-      ON c.CustomerID = r.CustomerID
-      JOIN Orders o
-      ON o.ReservationID = r.ReservationID
-      WHERE ReservationID = @ReservationID
+RETURNS VARCHAR(400)
+BEGIN
+  SET @Bill = "";
+    SET @Bill = SELECT 'Customer Name: ' + CustomerFirst + ' ' + 
+          CustomerLast + char(13) + char(10) +  
+                'Email: ' + 
+                CustomerEmail + CHAR(13) + CHAR(10) + 
+           'Phone Number: ' + CustomerPhone + CHAR(13) + CHAR(10)
+    FROM Customer c
+    JOIN Reservation r
+    ON c.CustomerID = r.CustomerID
+    JOIN Orders o
+    ON o.ReservationID = r.ReservationID
+    WHERE OrderID = OrderIDin;
+    
+    DECLARE BillingDetailsCursor CURSOR FOR
+    SELECT BillID, OrderID
+    FROM Billing b
+    JOIN Orders o 
+    ON b.OrderID = o.OrderID
+    WHERE b.OrderID = OrderIDin
+        
+    DECLARE @BillID         smallint
+    DECLARE @OrderID        smallint
+    DECLARE @BillingTotal   Decimal(10,4)
+    
+    SET @BillingTotal = 0
+    
+    OPEN BillingDetailsCursor
+    
+    -- Fetch First Time
+    FETCH NEXT FROM BillingDetailsCursor
+    INTO billing varibles
+    
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+      INSERT INTO @Bill VALUES(Billing values)
       
-      DECLARE BillingDetailsCursor CURSOR FOR
-      SELECT BillID, OrderID
-      FROM Billing b
-      JOIN Orders o 
-      ON b.OrderID = o.OrderID
-      WHERE b.OrderID = @OrderID
-          
-      DECLARE @BillID         smallint
-      DECLARE @OrderID        smallint
-      DECLARE @BillingTotal   Decimal(10,4)
-      
-      SET @BillingTotal = 0
-      
-      OPEN BillingDetailsCursor
-      
-      -- Fetch First Time
+      -- Fetch Again
       FETCH NEXT FROM BillingDetailsCursor
-      INTO billing varibles
+      INTO billing variables
       
-      WHILE @@FETCH_STATUS = 0
-      BEGIN
-        INSERT INTO @Bill VALUES(Billing values)
-        
-        -- Fetch Again
-        FETCH NEXT FROM BillingDetailsCursor
-        INTO billing variables
-        
-      END
+    END
       
-      CLOSE BillingDetailsCursor
-      DEALLOCATE BillingDetailsCursor
+    CLOSE BillingDetailsCursor
+    DEALLOCATE BillingDetailsCursor
+    
+    INSERT INTO @Bill VALUES('Billing Total: $' + CONVERT(varchar, @BillingTotal))
       
-      INSERT INTO @Bill VALUES('Billing Total: $' + CONVERT(varchar, @BillingTotal))
-      
-      RETURN
-  END</samp></code></pre>
+    RETURN
+ END //
+ DELIMITER ;</samp></code></pre>
 	</div>
 
 
