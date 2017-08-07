@@ -3,13 +3,15 @@ INSERT INTO reservation(reservationdatetime, restaurantid, customerid, reservati
 
 INSERT INTO orderitem(ItemID, OrderID, ItemQuantity) VALUES(1, 2, 0);
 
+UPDATE reservation SET ReservationStatus = 'X' WHERE ReservationID  = 2
+
 -- Stored Proceedures
 call sp_InsertCustomer('Cameron', 'Pickle', 'cmpickle@gmail.com', '8016948594', @customerID)
 
 call sp_UpdatePrices(11, 1) 
 call sp_UpdatePrices(-11, 0) 
 
-call sp_GetMenu(2000);
+call sp_GetMenu(5000);
 
 CALL sp_ReservationStatus(1, 'X');
 

@@ -61,7 +61,7 @@ CREATE FUNCTION ProduceBill
 RETURNS VARCHAR(400)
 BEGIN
   SET @Bill = "";
-    SET @Bill = SELECT 'Customer Name: ' + CustomerFirst + ' ' + 
+    SET @Bill = (SELECT 'Customer Name: ' + CustomerFirst + ' ' + 
           CustomerLast + char(13) + char(10) +  
                 'Email: ' + 
                 CustomerEmail + CHAR(13) + CHAR(10) + 
@@ -71,14 +71,11 @@ BEGIN
     ON c.CustomerID = r.CustomerID
     JOIN Orders o
     ON o.ReservationID = r.ReservationID
-    WHERE OrderID = OrderIDin;
+    WHERE OrderID = OrderIDin);
     
+    BEGIN
     DECLARE BillingDetailsCursor CURSOR FOR
-    SELECT BillID, OrderID
-    FROM Billing b
-    JOIN Orders o 
-    ON b.OrderID = o.OrderID
-    WHERE b.OrderID = OrderIDin
+    (SELECT BillID, OrderID FROM Billing b JOIN Orders o ON b.OrderID = o.OrderID WHERE b.OrderID = OrderIDin);
         
     DECLARE @BillID         smallint
     DECLARE @OrderID        smallint
@@ -106,6 +103,7 @@ BEGIN
     DEALLOCATE BillingDetailsCursor
     
     INSERT INTO @Bill VALUES('Billing Total: $' + CONVERT(varchar, @BillingTotal))
+    END
       
     RETURN
  END //
