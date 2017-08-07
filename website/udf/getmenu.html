@@ -56,10 +56,35 @@ Author: Cameron Pickle
 DELIMITER //
 CREATE PROCEDURE sp_GetMenu
 (
-  RestaurantIDin  smallint
+  IN RestaurantIDin  smallint,
+  OUT Menu           varchar(2000)
 )
 BEGIN
-    SELECT * FROM menuitem WHERE restaurantID = RestaurantIDin;
+    DECLARE v_finished INTEGER DEFAULT 0;
+    DECLARE menuItem VARCHAR(100);
+
+    DECLARE menuCursor CURSOR FOR
+    (SELECT CONCAT(ItemName, " $", CAST(ItemCost AS CHAR), " ", ItemDescription, CHAR(10), CHAR(13)) 'Item' FROM menuitem WHERE restaurantID = RestaurantIDin);
+
+    DECLARE CONTINUE HANDLER
+    FOR NOT FOUND SET v_finished = 1;
+    
+    SET Menu = "";
+
+    OPEN menuCursor;
+    get_menu: LOOP
+
+    FETCH menuCursor INTO menuItem;
+
+    IF v_finished = 1 THEN 
+    LEAVE get_menu;
+    END IF;
+
+    SET Menu = CONCAT(Menu, menuItem);
+
+    END LOOP get_menu;
+
+    CLOSE menuCursor;
 END //
 DELIMITER ;</samp></code></pre>
 	</div>

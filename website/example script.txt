@@ -11,7 +11,10 @@ call sp_InsertCustomer('Cameron', 'Pickle', 'cmpickle@gmail.com', '8016948594', 
 call sp_UpdatePrices(11, 1) 
 call sp_UpdatePrices(-11, 0) 
 
-call sp_GetMenu(5000);
+-- sp_GetMenu
+SET @menu = "";
+CALL sp_GetMenu(5000, @menu);
+SELECT @menu;
 
 CALL sp_ReservationStatus(1, 'X');
 
