@@ -62,7 +62,7 @@ CREATE FUNCTION CalculateDailyEarnings
 RETURNS decimal(4,2)
 BEGIN
       DECLARE v_finished INTEGER DEFAULT 0;
-      DECLARE t_cost DECIMAL(10,4);
+      DECLARE t_cost DECIMAL(10,2);
       
       DECLARE orderCursor CURSOR FOR 
       (SELECT BillAmount FROM billing b JOIN Orders o ON b.OrderID = o.OrderID JOIN reservation r ON o.ReservationID = r.ReservationID JOIN restaurant rest ON r.RestaurantID = rest.RestaurantID WHERE rest.RestaurantID = RestaurantIDin AND DATE(ReservationDateTime) = Datein);
@@ -79,10 +79,10 @@ BEGIN
       FETCH orderCursor INTO t_cost;
       
       IF v_finished = 1 THEN
-      LEAVE get_amount;
+        LEAVE get_amount;
       END IF;
       
-      set @result = @result + t_cost;
+      SET @result = @result + t_cost;
       
       END LOOP get_amount;
       

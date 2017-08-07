@@ -54,14 +54,14 @@ Author: Cameron Pickle
 -- --------------------------------------------------------------------------------
 DELIMITER //
 CREATE PROCEDURE sp_UpdatePrices(
-    IN PercentChange DOUBLE(10,4),
+    IN PercentChange DOUBLE(10,2),
     IN ItemID SMALLINT
 )
 BEGIN
   IF ItemID = 0 THEN
-    UPDATE MenuItem SET ItemCost = ItemCost * (1+CONVERT(PercentChange/100, Decimal(10,4)));
+    UPDATE MenuItem SET ItemCost = ItemCost * (1+CONVERT(PercentChange/100, Decimal(10,2)));
   else
-    UPDATE MenuItem SET ItemCost = ItemCost * (1+CONVERT(PercentChange/100, Decimal(10,4))) WHERE ItemID = ItemID;
+    UPDATE MenuItem SET ItemCost = ItemCost * (1+CONVERT(PercentChange/100, Decimal(10,2))) WHERE ItemID = ItemID;
   END IF;
 END//
 DELIMITER ;</samp></code></pre>

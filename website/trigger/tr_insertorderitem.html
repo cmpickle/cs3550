@@ -57,9 +57,10 @@ DELIMITER //
 CREATE TRIGGER tr_InsertOrderItem BEFORE INSERT ON OrderItem
 FOR EACH ROW
 BEGIN
-  
-    IF (SELECT ItemQuantity FROM OrderItem oi WHERE oi.OrderItemID = NEW.OrderItemID) < 1 THEN
-            INSERT INTO orderitem(OrderItemID, ItemID, OrderID, ItemQuantity) VALUES(NEW.OrderItemID, NEW.ItemID, OrderID, 1);
+    IF (NEW.ItemQuantity < 1) THEN
+    SIGNAL SQLSTATE VALUE '01026'
+          SET MESSAGE_TEXT = "The quantity must be non-negative, defaulting to 1.";
+            SET NEW.ItemQuantity = 1;
     END IF;
 END //
 DELIMITER ;</samp></code></pre>

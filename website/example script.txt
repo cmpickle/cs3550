@@ -1,13 +1,23 @@
+-- -------------------------------------------------------------------------------------------------------------------------------------
 -- Triggers
+-- -------------------------------------------------------------------------------------------------------------------------------------
+-- tr_
 INSERT INTO reservation(reservationdatetime, restaurantid, customerid, reservationstatus) VALUES('2017-08-02 17:30:00', 2000, 10, 'R')
 
+-- tr_InsertOrderItem
 INSERT INTO orderitem(ItemID, OrderID, ItemQuantity) VALUES(1, 2, 0);
 
+-- tr_ReservationStatus
 UPDATE reservation SET ReservationStatus = 'X' WHERE ReservationID  = 2
 
+
+-- -------------------------------------------------------------------------------------------------------------------------------------
 -- Stored Proceedures
+-- -------------------------------------------------------------------------------------------------------------------------------------
+-- sp_InsertCustomer
 call sp_InsertCustomer('Cameron', 'Pickle', 'cmpickle@gmail.com', '8016948594', @customerID)
 
+-- sp_UpdatePrices
 call sp_UpdatePrices(11, 1) 
 call sp_UpdatePrices(-11, 0) 
 
@@ -16,10 +26,15 @@ SET @menu = "";
 CALL sp_GetMenu(5000, @menu);
 SELECT @menu;
 
+-- sp_ReservationStatus
 CALL sp_ReservationStatus(1, 'X');
 
 
+-- -------------------------------------------------------------------------------------------------------------------------------------
 -- User Defined Functions
+-- -------------------------------------------------------------------------------------------------------------------------------------
+-- CalculateDailyEarnings
 SELECT CalculateDailyEarnings(5000, '2017-07-28')
 
+-- CalculateCancellationFees
 SELECT CalculateCancellationFees(5, '2017-08-04')

@@ -58,14 +58,13 @@ CREATE FUNCTION ProduceBill
 (
   OrderIDin smallint
 )
-RETURNS VARCHAR(400)
+RETURNS VARCHAR(2000)
 BEGIN
-  SET @Bill = "";
-    SET @Bill = (SELECT 'Customer Name: ' + CustomerFirst + ' ' + 
-          CustomerLast + char(13) + char(10) +  
-                'Email: ' + 
-                CustomerEmail + CHAR(13) + CHAR(10) + 
-           'Phone Number: ' + CustomerPhone + CHAR(13) + CHAR(10)
+    SET @Bill = (SELECT CONCAT('Customer Name: ', CustomerFirst, ' ', 
+          CustomerLast, char(13), char(10),  
+                'Email: ', 
+                CustomerEmail, CHAR(13), CHAR(10), 
+           'Phone Number: ', CustomerPhone, CHAR(13), CHAR(10), CHAR(13), CHAR(10))
     FROM Customer c
     JOIN Reservation r
     ON c.CustomerID = r.CustomerID
@@ -74,38 +73,43 @@ BEGIN
     WHERE OrderID = OrderIDin);
     
     BEGIN
+    DECLARE v_finished INTEGER DEFAULT 0;
+    DECLARE v_itemName VARCHAR(20);
+    DECLARE v_itemCost DECIMAL(10,2);
+    DECLARE v_itemQuantity SMALLINT;
+
     DECLARE BillingDetailsCursor CURSOR FOR
-    (SELECT BillID, OrderID FROM Billing b JOIN Orders o ON b.OrderID = o.OrderID WHERE b.OrderID = OrderIDin);
-        
-    DECLARE @BillID         smallint
-    DECLARE @OrderID        smallint
-    DECLARE @BillingTotal   Decimal(10,4)
+    (SELECT ItemName, ItemCost, ItemQuantity FROM MenuItem mi JOIN OrderItem oi ON mi.ItemID = oi.ItemID JOIN Orders o ON oi.OrderID = o.OrderID WHERE o.OrderID = OrderIDin);
+
+    DECLARE CONTINUE HANDLER
+    FOR NOT FOUND SET v_finished = 1;
     
-    SET @BillingTotal = 0
+    SET @BillingTotal = 0.0;
     
-    OPEN BillingDetailsCursor
+    OPEN BillingDetailsCursor;
+    billing_details: LOOP
     
-    -- Fetch First Time
-    FETCH NEXT FROM BillingDetailsCursor
-    INTO billing varibles
+        FETCH BillingDetailsCursor INTO v_itemName, v_itemCost, v_itemQuantity;
+
+    IF v_finished = 1 THEN
+      LEAVE billing_details;
+    END IF;
     
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-      INSERT INTO @Bill VALUES(Billing values)
+    SET @Bill = CONCAT(@Bill, CONCAT(v_itemName, " $", CAST(v_itemCost AS CHAR), " Qty: ", v_itemQuantity, CHAR(13), CHAR(10)));
+    
+    SET @BillingTotal = @BillingTotal + v_itemCost * v_itemQuantity;
+    
+    END LOOP billing_details;
       
-      -- Fetch Again
-      FETCH NEXT FROM BillingDetailsCursor
-      INTO billing variables
+    CLOSE BillingDetailsCursor;
       
-    END
-      
-    CLOSE BillingDetailsCursor
-    DEALLOCATE BillingDetailsCursor
+    END;
     
-    INSERT INTO @Bill VALUES('Billing Total: $' + CONVERT(varchar, @BillingTotal))
-    END
+    SET @Bill = (CONCAT(@Bill, CHAR(13), CHAR(10), 'Billing Total: $', CAST(@BillingTotal AS CHAR)));
+    
+    INSERT INTO billing(OrderID, BillAmount, BillPaid) VALUES(OrderIDin, @BillingTotal, 0);
       
-    RETURN
+    RETURN @Bill;
  END //
  DELIMITER ;</samp></code></pre>
 	</div>
