@@ -63,9 +63,9 @@ RETURNS DECIMAL(10,2)
 BEGIN
   SET @ChargeAmount = 0.00;
   SET @ChargeAmount = 0;
-  IF ((DATEDIFF(CancellationDate, (SELECT ReservationDateTime FROM Reservation WHERE ReservationID = ReservationIDin))<=4) AND (DATEDIFF(CancellationDate, (SELECT ReservationDateTime FROM Reservation WHERE ReservationID = ReservationIDin))>=2)) THEN
+  IF ((DATEDIFF((SELECT ReservationDateTime FROM Reservation WHERE ReservationID = ReservationIDin), CancellationDate)<=4) AND (DATEDIFF((SELECT ReservationDateTime FROM Reservation WHERE ReservationID = ReservationIDin), CancellationDate)>=2)) THEN
       SET @ChargeAmount = 15;
-  ELSEIF (DATEDIFF(CancellationDate, (SELECT ReservationDateTime FROM Reservation WHERE ReservationID = ReservationIDin))<=2) THEN
+  ELSEIF (DATEDIFF((SELECT ReservationDateTime FROM Reservation WHERE ReservationID = ReservationIDin), CancellationDate)<=2) THEN
       SET @ChargeAmount = 30;
   END IF;
   

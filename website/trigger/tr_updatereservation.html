@@ -57,13 +57,14 @@ DELIMITER //
 CREATE TRIGGER tr_UpdateReservation AFTER UPDATE ON Reservation
 FOR EACH ROW
 BEGIN
-  IF ((SELECT OLD.ReservationID FROM reservation) != (SELECT NEW.ReservationID FROM reservation)) AND (SELECT ReservationStatus FROM OLD) = 'X' THEN
-  SET @ReservationID = (SELECT ReservationID FROM OLD);
-  SET @CancellationDate = GETDATE();
+  IF (SELECT NEW.ReservationStatus FROM Reservation r WHERE r.ReservationID = NEW.ReservationID) = 'X' THEN
+    SET @CancellationDate = CURDATE();
   
-  SET @ChargeAmount = CalculateCancellationFees(OLD.ReservationID, @CancellationDate);
-  
-  INSERT INTO Billing VALUES(OrderID, @ChargeAmount, 0);
+    SET @ChargeAmount = CalculateCancellationFees(NEW.ReservationID, @CancellationDate);
+
+    SET @OrderID = (SELECT OrderID FROM Orders o WHERE o.ReservationID = NEW.ReservationID);
+   
+    INSERT INTO Billing(OrderID, BillAmount, BillPaid) VALUES(@OrderID, @ChargeAmount, 0);
   END IF;
 END //
 DELIMITER ;</samp></code></pre>
