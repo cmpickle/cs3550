@@ -5,7 +5,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Pickle Restaurant tr_GenerateBill</title>
+<title>Pickle Restaurant tr_ValidInsertReservationStatus</title>
 
 <!-- 
 Author: Cameron Pickle
@@ -49,18 +49,23 @@ Author: Cameron Pickle
     </div>
   </nav>
 	<div class="container">
-    <pre><code><samp>----------------------------------------------------------------------------------
--- tr_GenerateBill
-----------------------------------------------------------------------------------
-CREATE TRIGGER tr_GenerateBill AFTER INSERT ON Billing
-DECLARE @OrderID smallint
-SET @OrderID = (SELECT b.OrderID FROM Billing b
-                JOIN inserted i ON b.FolioBillingID = i.FolioBillingID)
-IF EXISTS (SELECT 'value' FROM inserted i
-      JOIN Billing b ON i.BillID = b.BillID)
+    <pre><code><samp>-- --------------------------------------------------------------------------------
+-- tr_ValidInsertReservationStatus
+-- --------------------------------------------------------------------------------
+
+DELIMITER //
+CREATE TRIGGER tr_ValidInsertReservationStatus BEFORE INSERT ON Reservation
+FOR EACH ROW
 BEGIN
-  SELECT * FROM dbo.ProduceBill(@OrderID)
-END</samp></code></pre>
+  IF (NEW.ReservationStatus != 'R' AND 
+      NEW.ReservationStatus != 'A' AND
+      NEW.ReservationStatus != 'C' AND
+      NEW.ReservationStatus != 'X') THEN
+    SIGNAL SQLSTATE VALUE '99027'
+          SET MESSAGE_TEXT = "The reservation status must be a valid status {R, A, C, X}";
+  END IF;
+END //
+DELIMITER ;</samp></code></pre>
 	</div>
 
 

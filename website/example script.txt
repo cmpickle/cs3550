@@ -1,40 +1,62 @@
 -- -------------------------------------------------------------------------------------------------------------------------------------
 -- Triggers
 -- -------------------------------------------------------------------------------------------------------------------------------------
--- tr_
-INSERT INTO reservation(reservationdatetime, restaurantid, customerid, reservationstatus) VALUES('2017-08-02 17:30:00', 2000, 10, 'R')
+-- tr_CustomerIDMustExist
+INSERT INTO reservation(reservationdatetime, restaurantid, customerid, reservationstatus) VALUES('2017-08-02 17:30:00', 2000, 10, 'R');
+
+-- tr_UpdateReservationStatus
+UPDATE reservation SET ReservationStatus = 'X' WHERE ReservationID  = 2;
+
+-- tr_ValidInsertReservationStatus
+INSERT INTO reservation(ReservationDateTime, RestaurantID, CustomerID, ReservationStatus) VALUES('2017-08-08', 1, 4, 'Q');
+UPDATE reservation SET ReservationStatus = 'R' WHERE ReservationID = 1;
+
+-- tr_ValidUpdateReservationStatus
+UPDATE reservation SET ReservationStatus = 'Q' WHERE ReservationID = 1;
 
 -- tr_InsertOrderItem
 INSERT INTO orderitem(ItemID, OrderID, ItemQuantity) VALUES(1, 2, 0);
 
--- tr_ReservationStatus
-UPDATE reservation SET ReservationStatus = 'X' WHERE ReservationID  = 2
+-- tr_ReferencialIntegrity
+
 
 
 -- -------------------------------------------------------------------------------------------------------------------------------------
 -- Stored Proceedures
 -- -------------------------------------------------------------------------------------------------------------------------------------
 -- sp_InsertCustomer
-call sp_InsertCustomer('Cameron', 'Pickle', 'cmpickle@gmail.com', '8016948594', @customerID)
+call sp_InsertCustomer('Cameron', 'Pickle', 'cmpickle@gmail.com', '8016948594', @customerID);
 
 -- sp_UpdatePrices
-call sp_UpdatePrices(11, 1) 
-call sp_UpdatePrices(-11, 0) 
+call sp_UpdatePrices(11, 1);
+call sp_UpdatePrices(-11, 0);
+
+-- sp_ReservationStatus
+CALL sp_ReservationStatus(1, 'X');
 
 -- sp_GetMenu
 SET @menu = "";
 CALL sp_GetMenu(5000, @menu);
 SELECT @menu;
 
--- sp_ReservationStatus
-CALL sp_ReservationStatus(1, 'X');
-
 
 -- -------------------------------------------------------------------------------------------------------------------------------------
 -- User Defined Functions
 -- -------------------------------------------------------------------------------------------------------------------------------------
+-- ProduceBill
+SELECT ProduceBill(1);
+
 -- CalculateDailyEarnings
-SELECT CalculateDailyEarnings(5000, '2017-07-28')
+SELECT CalculateDailyEarnings(5000, '2017-07-28');
 
 -- CalculateCancellationFees
-SELECT CalculateCancellationFees(5, '2017-08-04')
+SELECT CalculateCancellationFees(5, '2017-08-04');
+
+
+-- -------------------------------------------------------------------------------------------------------------------------------------
+-- Distributed Queries
+-- -------------------------------------------------------------------------------------------------------------------------------------
+-- AddBillToFarms
+
+
+-- RetrieveCustomerFromFARMS

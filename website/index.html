@@ -106,9 +106,11 @@ Author: Cameron Pickle
     								</div>
     								
     								<div class="entry bg-info">
-      								<p class="entryHeader"><a href="trigger/tr_generatebill.html">tr_GenerateBill</a></p>
-      								<p>Type: On Insert - After</p>
-      								<p>Description: When an order is set to not active generate a bill for the customer. When the OrderActive bit is set to 0 the trigger will call the GenerateBill UDF and display it for the user.</p>
+      								<p class="entryHeader"><a href="trigger/tr_validinsertreservationstatus.html">tr_ValidInsertReservationStatus</a></p>
+      								<p>Type: On Insert - Before</p>
+                      <p class="entryHeader"><a href="trigger/tr_validupdatereservationstatus.html">tr_ValidUpdateReservationStatus</a></p>
+                      <p>Type: On Update - Before</p>
+      								<p>Description: When a row is inserted or updated in the Reservation table make sure that the status is valid. The status may be R - reserved, A - active, C - complete, and X - cancelled. If the status isn't in the list of valid status then an error will be thrown and the transaction will be rolled back.</p>
     								</div>
     								
     								<div class="entry bg-info">
