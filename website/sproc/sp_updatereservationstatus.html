@@ -54,13 +54,22 @@ Author: Cameron Pickle
 -- --------------------------------------------------------------------------------
 
 DELIMITER //
-CREATE PROCEDURE sp_ReservationStatus 
+CREATE PROCEDURE sp_UpdateReservationStatus 
 (
-  IN ReservationIDin          smallint,
-  IN ReservationStatusin      smallint
+  IN ReservationIDin          SMALLINT,
+  IN ReservationStatusin      CHAR(1)
 )
 BEGIN
-  UPDATE Reservation SET ReservationStatus = ReservationStatusin WHERE ReservationID = ReservationIDin;
+  -- Make sure the reservation ID exists in the Reservation table
+  IF (SELECT ReservationID FROM Reservation WHERE ReservationID = ReservationIDin) IS NOT NULL THEN
+    -- If it does update the reservation status
+    UPDATE Reservation SET ReservationStatus = ReservationStatusin WHERE ReservationID = ReservationIDin;
+  ELSE
+    -- If it doesn't throw an error
+    SET @ErrMsg = CONCAT(ReservationIDin, " is not a valid reservation ID. Please enter a valid reservation ID.");
+    SIGNAL SQLSTATE VALUE '03026'
+          SET MESSAGE_TEXT = @ErrMsg;
+  END IF;
 END //
 DELIMITER ;</samp></code></pre>
   </div>

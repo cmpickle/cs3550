@@ -1,0 +1,47 @@
+----------------------------------------------------------------------------------
+-- sp_InsertGuestToRestaurant
+----------------------------------------------------------------------------------
+
+USE Pickle_FARMS
+
+GO
+
+-- check to see if sp_InsertGuestToRestaurant exists
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_NAME= 'sp_InsertGuestToRestaurant')
+	DROP PROCEDURE sp_InsertGuestToRestaurant;
+GO
+
+-- create procedure
+CREATE PROCEDURE sp_InsertGuestToRestaurant
+	@GuestID			smallint
+AS
+BEGIN
+	DECLARE @GuestFirst VARCHAR(20)
+	DECLARE @GuestLast VARCHAR(20)
+	DECLARE @GuestEmail VARCHAR(50)
+	DECLARE @GuestPhone VARCHAR(20)
+	
+	SET @GuestFirst = (SELECT GuestFirst FROM Guest WHERE GuestID = @GuestID)
+	SET @GuestLast = (SELECT GuestLast FROM Guest WHERE GuestID = @GuestID)
+	SET @GuestEmail = (SELECT GuestEmail FROM Guest WHERE GuestID = @GuestID)
+	SET @GuestPhone = (SELECT GuestPhone FROM Guest WHERE GuestID = @GuestID)
+
+	Exec (	'CALL sp_InsertCustomer(''' + @GuestFirst + 
+			''', ''' + @GuestLast + 
+			''', ''' + @GuestEmail + 
+			''', ''' + @GuestPhone + 
+			''', @null)') AT LINKED_MYSQL
+	
+END
+
+GO
+
+-- test by adding guest 1500
+EXEC sp_InsertGuestToRestaurant
+	@GuestID			= 1500
+	
+GO
+
+SELECT * FROM openquery(LINKED_MYSQL, 'SELECT * FROM Customer')
+
+GO

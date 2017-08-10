@@ -1,0 +1,613 @@
+-- Database Creation Script 
+-- Cameron Pickle 7/19/2017
+-- This creates the FARMS Restaurant database
+-- Uses MySQL database
+
+DROP DATABASE IF EXISTS Pickle_Restaurant;
+
+CREATE DATABASE Pickle_Restaurant;
+
+-- With the Pickle_Restaurant database now created, switch to it and begin creating the individual 
+-- tables for the database
+
+USE Pickle_Restaurant;
+
+CREATE TABLE Restaurant
+(
+    RestaurantID      SMALLINT    NOT NULL  AUTO_INCREMENT, 
+    RestaurantName      VARCHAR(20)   NOT NULL, 
+    HotelID         SMALLINT    NOT NULL, 
+    RestaurantDescription   VARCHAR(200)  NOT NULL, 
+    RestaurantRating    SMALLINT    NULL,
+    PRIMARY KEY(RestaurantID)
+);
+
+CREATE TABLE Reservation
+(
+    ReservationID     SMALLINT    NOT NULL AUTO_INCREMENT,
+    ReservationDateTime   DATETIME    NOT NULL,
+    RestaurantID      SMALLINT    NOT NULL,
+    CustomerID        SMALLINT    NOT NULL,
+    ReservationStatus   CHAR(1)     NOT NULL,
+    PRIMARY KEY(ReservationID)
+);
+
+CREATE TABLE Customer
+(
+    CustomerID      SMALLINT    NOT NULL  AUTO_INCREMENT,
+    CustomerFirst   VARCHAR(20)   NOT NULL,
+    CustomerLast    VARCHAR(20)   NOT NULL,
+    CustomerEmail   VARCHAR(50)   NULL,
+    CustomerPhone   VARCHAR(15)   NULL,
+    PRIMARY KEY(CustomerID)
+);
+
+CREATE TABLE Orders
+(
+    OrderID     SMALLINT    NOT NULL  AUTO_INCREMENT,
+    OrderDetailID SMALLINT    NOT NULL,
+    ReservationID SMALLINT    NOT NULL,
+    OrderTime   TIME      NOT NULL,
+    OrderActive   BIT       NOT NULL,
+    PRIMARY KEY(OrderID)
+);
+
+CREATE TABLE Billing
+(
+    BillingID   SMALLINT    NOT NULL  AUTO_INCREMENT,
+    OrderID     SMALLINT    NOT NULL,
+    BillAmount    DECIMAL(10,2) NOT NULL,
+    BillPaid    BIT       NOT NULL,
+    PRIMARY KEY(BillingID)
+);
+
+CREATE TABLE OrderItem
+(
+    OrderItemID   SMALLINT    NOT NULL  AUTO_INCREMENT,
+    ItemID      SMALLINT    NOT NULL,
+    OrderID     SMALLINT    NOT NULL,
+    ItemQuantity  TINYINT     NOT NULL,
+    PRIMARY KEY(OrderItemID)
+);
+
+CREATE TABLE MenuItem
+(
+    ItemID      SMALLINT    NOT NULL  AUTO_INCREMENT,
+    ItemName    VARCHAR(20)   NOT NULL,
+    ItemCost    DECIMAL(10,2) NOT NULL,
+    ItemDescription VARCHAR(200)  NOT NULL,
+    RestaurantID  SMALLINT    NOT NULL,
+    ItemType    VARCHAR(20)   NULL,
+    PRIMARY KEY(ItemID)
+);
+
+-- Alter the tables where autoincrement starts at a specific value 
+ALTER TABLE Restaurant
+  AUTO_INCREMENT = 5000;
+    
+-- Alter tables to set up foreign keys 
+ALTER TABLE Reservation
+  ADD CONSTRAINT fk_restaurant_id
+    FOREIGN KEY (RestaurantID) REFERENCES Restaurant(RestaurantID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
+    
+ALTER TABLE Reservation
+    ADD CONSTRAINT fk_customer_id
+    FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
+
+ALTER TABLE Orders
+  ADD CONSTRAINT fk_reservation_id
+    FOREIGN KEY (ReservationID) REFERENCES Reservation(ReservationID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
+    
+ALTER TABLE Billing
+  ADD CONSTRAINT fk_order_id_billing
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
+    
+ALTER TABLE OrderItem
+  ADD CONSTRAINT fk_item_id
+    FOREIGN KEY (ItemID) REFERENCES MenuItem(ItemID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
+    
+ALTER TABLE OrderItem
+  ADD CONSTRAINT fk_order_id_orderitem
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
+
+
+-- Add defaults
+ALTER TABLE Customer
+  ALTER CustomerFirst SET DEFAULT 'John';
+    
+ALTER TABLE Customer
+  ALTER CustomerLast SET DEFAULT 'Smith';
+    
+ALTER TABLE OrderItem
+  ALTER ItemQuantity SET DEFAULT 1;
+    
+ALTER TABLE Orders
+  ALTER OrderActive SET DEFAULT 1;
+
+INSERT INTO Restaurant (RestaurantName, HotelID, RestaurantDescription, RestaurantRating)
+VALUES  ('The Flaming Iguana', 2100, 'A bright lively atmosphere. The Flaming Iguana is known for it''s fire dancers who entertain guests as they eat their meals.', 7),
+    ('The Tavern', 2200, 'A rowdy restaurant that is themed to the old west. Watch out for the bandit that romes this town.', 6),
+    ('Cafeteria Land', 2300, 'Do you miss the day of school cafeterias? Well no longer my friend Cafeteria Land is the place for you!', 2),
+    ('Mr Jimmies', 2400, 'Take a break and slow down for a relaxing meal at Mr Jimmies. It''s a nice calm restaurants with all your favorite meals!', 5);
+
+INSERT INTO Reservation (ReservationDateTime, RestaurantID, CustomerID, ReservationStatus)
+VALUES  ('2017-7-28 18-30-00', 5000, 1, 'A'),
+    ('2017-7-28 17-30-00', 5000, 2, 'C'),
+    ('2017-9-13 17-30-00', 5001, 3, 'R'),
+    ('2017-8-23 17-30-00', 5002, 3, 'R'),
+    ('2017-10-12 17-30-00', 5002, 4, 'R'),
+    ('2017-11-16 17-30-00', 5003, 5, 'R'),
+    ('2017-12-8 17-30-00', 5003, 6, 'R'),
+    ('2018-12-4 17-30-00', 5003, 7, 'R'),
+    ('2017-8-2 17-30-00', 5002, 8, 'R'),
+    ('2017-7-31 17-30-00', 5001, 9, 'R'),
+    ('2017-10-24 17-30-00', 5000, 10, 'R'),
+    ('2017-9-9 17-30-00', 5000, 4, 'R'),
+    ('2017-9-11 17-30-00', 5003, 2, 'R'),
+    ('2017-11-11 17-30-00', 5002, 8, 'R'),
+    ('2017-12-25 17-30-00', 5001, 9, 'R'),
+    ('2017-8-15 17-30-00', 5000, 5, 'R');
+
+INSERT INTO Customer(CustomerFirst, CustomerLast, CustomerEmail, CustomerPhone)
+VALUES  ('Ben', 'Bitwize', 'onesandzeros@gmail.com', '1010101010'),
+    ('Rod', 'McCallister', 'westerner@guns.com', '8015551234'),
+    ('Sally', 'Swoon', null, null),
+    ('Ron', 'Swanson', 'killthegov@america.me', null),
+    ('Micheal', 'Scott', 'magicman@scarn.net', '2374981234'),
+    ('Dwight', 'Schrute', 'dwight@schrutefarms.beet', '12345678'),
+    ('Obi Wan', 'Kenobi', null, null),
+    ('Mr', 'Monkey', null, '87654321'),
+    ('Sherlock', 'Holmes', 'detective@inconspicuos.net', '8015554321'),
+    ('Chuck', 'Bartowski', 'nerdherder@buymore.com', '18005555555');
+
+INSERT INTO Orders (OrderDetailID, ReservationID, OrderTime, OrderActive)
+VALUES  (1, 1, '18:35:00', 1),
+    (2, 2, '18:35:00', 1),
+    (3, 3, '18:35:00', 1),
+    (4, 4, '18:35:00', 1),
+    (5, 5, '18:35:00', 1),
+    (6, 6, '18:35:00', 1),
+    (7, 7, '18:35:00', 1),
+    (8, 8, '18:35:00', 1),
+    (9, 9, '18:35:00', 1),
+    (10, 10, '18:35:00', 1),
+    (11, 11, '18:35:00', 1);
+
+INSERT INTO Billing (OrderID, BillAmount, BillPaid)
+VALUES  (1, 36.96, 1);
+
+INSERT INTO OrderItem (ItemID, OrderID, ItemQuantity)
+VALUES  (1, 1, 2),
+    (3, 1, 1),
+    (5, 1, 1),
+    (6, 1, 1),
+    (8, 1, 1);
+
+INSERT INTO MenuItem (ItemName, ItemCost, ItemDescription, RestaurantID, ItemType)
+VALUES  ('Burrito', 7.99, 'A delicious burrito', 5000, 'Food'),
+    ('Taco', 6.99, 'A crunchy taco', 5000, 'Food'),
+    ('Enchilada', 7.99, 'A flavorful enchilada', 5000, 'Food'),
+    ('Tostada', 7.50, 'A toasty tostada', 5000, 'Food'),
+    ('Quesadilla', 4.50, 'A cheesy quesadilla', 5000, 'Food'),
+    ('Mole', 5.99, 'Buenisimo es este mole!', 5000, 'Food'),
+    ('Nachos', 6.99, 'Savory nachos', 5000, 'Food'),
+    ('Pasole', 5.99, 'Pasole para dias', 5000, 'Food'),
+    ('Horchata', 1.50, 'Sweet and delicious', 5000, 'Beverage'),
+    ('Agua Fresca', 1.50, 'Freshly made Agua Fresca', 5000, 'Beverage'),
+    ('Torta de Tres Leches', 5.99, 'Que rico papi!', 5000, 'Dessert'),
+    ('Burger', 6.99, 'A tasty burger', 5001, 'Food'),
+    ('Fries', 3.99, 'Home made fries', 5001, 'Food'),
+    ('Steak', 12.99, 'A nice juicy steak', 5001, 'Food'),
+    ('Rack O Ribs', 15.99, 'The best lookin'' rack you eva'' saw', 5001, 'Food'),
+    ('Crusty Crackers', 0.99, 'I found them on the floor in the back room', 5001, 'Food'),
+    ('Dry Roll', 0.99, 'I think it was left out', 5001, 'Food'),
+    ('Jerky', 4.99, 'Not sure which kind it is', 5001, 'Food'),
+    ('Beer', 4.99, 'Sweet and delicious', 5001, 'Beverage'),
+    ('Whiskey', 7.99, 'Freshly made Agua Fresca', 5001, 'Beverage'),
+    ('Tar Cake', 3.99, 'Nice and sticky', 5001, 'Dessert'),
+    ('Square Pizza', 1.50, 'Just as nasty today as it was back then', 5002, 'Food'),
+    ('Corndog', 0.79, 'Some nice proccessing done to it', 5002, 'Food'),
+    ('Rubber Cheese', 0.20, 'Is this made out of gasoline?', 5002, 'Food'),
+    ('Sloppy Joe', 1.60, 'I made them extra shloppy for ya', 5002, 'Food'),
+    ('Boiled Burger', 2.99, 'Who knew you could boil them?', 5002, 'Food'),
+    ('French Toast', 1.99, 'More like cardboard strips', 5002, 'Food'),
+    ('Roll', 1.99, 'We''ll admit it, this is our best food', 5002, 'Food'),
+    ('Milk', 0.99, 'How can you get milk wrong, well we did', 5002, 'Beverage'),
+    ('Fake Orange Juice', 0.99, 'Freshly made Agua Fresca', 5002, 'Beverage'),
+    ('Crappy Cake', 0.99, 'Nice and sticky', 5002, 'Dessert'),
+    ('Chicken Fried Steak', 6.99, 'Nice n'' greasy', 5003, 'Food'),
+    ('Eggplan Parmesian', 6.99, 'tasty tasty', 5003, 'Food'),
+    ('Spaghetti', 6.99, 'Just like mamma made', 5003, 'Food'),
+    ('Fried Chicken', 7.99, 'Food for the soul', 5003, 'Food'),
+    ('Hamburger', 5.99, 'Good ol hamburger', 5003, 'Food'),
+    ('Pancakes', 5.99, '4 stack of flapjacks', 5003, 'Food'),
+    ('Salad', 8.99, 'For those who like to think the''re being healthy', 5003, 'Food'),
+    ('Water', 1.99, 'Classic H20', 5003, 'Beverage'),
+    ('Soda', 1.50, 'All coke products', 5003, 'Beverage'),
+    ('Ice Cream', 1.99, 'A refreshing sweet treat', 5003, 'Dessert');
+    
+-- --------------------------------------------------------------------------------
+-- tr_CustomerIDMustExist
+-- --------------------------------------------------------------------------------
+
+DELIMITER //
+CREATE TRIGGER tr_CustomerIDMustExist AFTER INSERT ON Reservation
+FOR EACH ROW
+BEGIN
+    DECLARE CustomerID SMALLINT;
+
+    -- If the customer ID that is being inserted does not exist in the reservation table
+    IF NEW.CustomerID NOT IN (SELECT c.CustomerID FROM Reservation r JOIN Customer c ON r.CustomerID = c.CustomerID WHERE c.CustomerID = NEW.CustomerID) THEN
+      SET @ErrMsg = CONCAT(NEW.CustomerID, " is not a valid customer ID. Please enter a valid customer ID.");
+
+      -- Throw an error and roll back transaction
+      SIGNAL SQLSTATE VALUE '02026'
+          SET MESSAGE_TEXT = @ErrMsg;
+    END IF;
+END //
+DELIMITER ;
+
+-- ----------------------------------------------------------------------------
+-- tr_UpdateReservation
+-- --------------------------------------------------------------------------------
+
+DELIMITER //
+CREATE TRIGGER tr_UpdateReservation AFTER UPDATE ON Reservation
+FOR EACH ROW
+BEGIN
+  IF (SELECT NEW.ReservationStatus FROM Reservation r WHERE r.ReservationID = NEW.ReservationID) = 'X' THEN
+    SET @CancellationDate = CURDATE();
+  
+    SET @ChargeAmount = CalculateCancellationFees(NEW.ReservationID, @CancellationDate);
+
+    SET @OrderID = (SELECT OrderID FROM Orders o WHERE o.ReservationID = NEW.ReservationID);
+   
+    INSERT INTO Billing(OrderID, BillAmount, BillPaid) VALUES(@OrderID, @ChargeAmount, 0);
+  END IF;
+END //
+DELIMITER ;
+
+-- --------------------------------------------------------------------------------
+-- tr_ValidInsertReservationStatus
+-- --------------------------------------------------------------------------------
+
+DELIMITER //
+CREATE TRIGGER tr_ValidInsertReservationStatus BEFORE INSERT ON Reservation
+FOR EACH ROW
+BEGIN
+  IF (NEW.ReservationStatus != 'R' AND 
+      NEW.ReservationStatus != 'A' AND
+      NEW.ReservationStatus != 'C' AND
+      NEW.ReservationStatus != 'X') THEN
+    SIGNAL SQLSTATE VALUE '99027'
+          SET MESSAGE_TEXT = "The reservation status must be a valid status {R, A, C, X}";
+  END IF;
+END //
+DELIMITER ;
+
+-- --------------------------------------------------------------------------------
+-- tr_ValidUpdateReservationStatus
+-- --------------------------------------------------------------------------------
+
+DELIMITER //
+CREATE TRIGGER tr_ValidUpdateReservationStatus BEFORE UPDATE ON Reservation
+FOR EACH ROW
+BEGIN
+  IF (NEW.ReservationStatus != 'R' AND 
+      NEW.ReservationStatus != 'A' AND
+      NEW.ReservationStatus != 'C' AND
+      NEW.ReservationStatus != 'X') THEN
+    SIGNAL SQLSTATE VALUE '99027'
+          SET MESSAGE_TEXT = "The reservation status must be a valid status {R, A, C, X}";
+  END IF;
+END //
+DELIMITER ;
+
+-- --------------------------------------------------------------------------------
+-- tr_InsertOrderItem
+-- --------------------------------------------------------------------------------
+
+DELIMITER //
+CREATE TRIGGER tr_InsertOrderItem BEFORE INSERT ON OrderItem
+FOR EACH ROW
+BEGIN
+    IF (NEW.ItemQuantity < 1) THEN
+    SIGNAL SQLSTATE VALUE '01026'
+          SET MESSAGE_TEXT = "The quantity must be non-negative, defaulting to 1.";
+            SET NEW.ItemQuantity = 1;
+    END IF;
+END //
+DELIMITER ;
+
+-- --------------------------------------------------------------------------------
+-- sp_InsertCustomer(CustomerFirst, CustomerLast, CustomerEmail, CustomerPhone, out CustomerID)
+-- --------------------------------------------------------------------------------
+
+DELIMITER //
+CREATE PROCEDURE sp_InsertCustomer(
+  IN CustomerFirst     varchar(20),
+  IN CustomerLast      varchar(20),
+  IN CustomerEmail     varchar(50),
+  IN CustomerPhone     varchar(15),
+  OUT CustomerID        smallint)
+BEGIN
+    INSERT INTO Customer (CustomerFirst, CustomerLast, CustomerEmail, CustomerPhone)
+      VALUES(
+        CustomerFirst,
+        CustomerLast,
+        CustomerEmail,
+        CustomerPhone
+      );
+    
+    SET CustomerID = LAST_INSERT_ID();
+END //
+DELIMITER ;
+
+-- --------------------------------------------------------------------------------
+-- sp_UpdatePrices(PercentChange, ItemIDin)
+-- --------------------------------------------------------------------------------
+DELIMITER //
+CREATE PROCEDURE sp_UpdatePrices(
+    IN PercentChange DOUBLE(10,2),
+    IN ItemIDin SMALLINT
+)
+BEGIN
+  -- If the ItemIDin is 0 then update all Items
+  IF ItemIDin = 0 THEN
+    UPDATE MenuItem SET ItemCost = ItemCost * (1+CONVERT(PercentChange/100, Decimal(10,2)));
+  -- If the ItemIDin is a specific number then update that Item
+  ELSE
+    -- Validate that the ItemID exists
+    IF (SELECT ItemID FROM MenuItem WHERE ItemID = ItemIDin) IS NOT NULL THEN
+      -- If it does update the item's price
+      UPDATE MenuItem SET ItemCost = ItemCost * (1+CONVERT(PercentChange/100, Decimal(10,2))) WHERE ItemID = ItemIDin;
+    ELSE
+      -- If it doesn't throw an error
+      SET @ErrMsg = CONCAT(ItemIDin, " is not a valid item ID. Please enter a valid item ID.");
+      SIGNAL SQLSTATE VALUE '03026'
+            SET MESSAGE_TEXT = @ErrMsg;
+    END IF;
+
+  END IF;
+END//
+DELIMITER ;
+
+-- ----------------------------------------------------------------------------
+-- sp_UpdateReservationStatus(ReservationID, ReservationStatus)
+-- --------------------------------------------------------------------------------
+
+DELIMITER //
+CREATE PROCEDURE sp_UpdateReservationStatus 
+(
+  IN ReservationIDin          SMALLINT,
+  IN ReservationStatusin      CHAR(1)
+)
+BEGIN
+  -- Make sure the reservation ID exists in the Reservation table
+  IF (SELECT ReservationID FROM Reservation WHERE ReservationID = ReservationIDin) IS NOT NULL THEN
+    -- If it does update the reservation status
+    UPDATE Reservation SET ReservationStatus = ReservationStatusin WHERE ReservationID = ReservationIDin;
+  ELSE
+    -- If it doesn't throw an error
+    SET @ErrMsg = CONCAT(ReservationIDin, " is not a valid reservation ID. Please enter a valid reservation ID.");
+    SIGNAL SQLSTATE VALUE '03026'
+          SET MESSAGE_TEXT = @ErrMsg;
+  END IF;
+END //
+DELIMITER ;
+
+-- --------------------------------------------------------------------------------
+-- sp_GetMenu(RestaurantID)
+-- --------------------------------------------------------------------------------
+
+DELIMITER //
+CREATE PROCEDURE sp_GetMenu
+(
+  IN RestaurantIDin  smallint,
+  OUT Menu           varchar(2000)
+)
+BEGIN
+    -- Cursor variables
+    DECLARE v_finished INTEGER DEFAULT 0;
+    DECLARE menuItem VARCHAR(100);
+
+    -- Create the cursor
+    DECLARE menuCursor CURSOR FOR
+    (SELECT CONCAT(ItemName, " $", CAST(ItemCost AS CHAR), " ", ItemDescription, CHAR(10), CHAR(13)) 'Item' FROM menuitem WHERE restaurantID = RestaurantIDin);
+
+    -- The condition that sets when the cursor breaks the loop
+    DECLARE CONTINUE HANDLER
+    FOR NOT FOUND SET v_finished = 1;
+    
+    -- Result variable
+    SET Menu = "";
+
+    -- Open the cursor and start the loop
+    OPEN menuCursor;
+    get_menu: LOOP
+
+    -- Fetch values from cursor
+    FETCH menuCursor INTO menuItem;
+
+    -- Check if cursor is finished
+    IF v_finished = 1 THEN 
+    LEAVE get_menu;
+    END IF;
+
+    -- Update the result variable by concatenating on the new values
+    SET Menu = CONCAT(Menu, menuItem);
+
+    -- End and close the cursor
+    END LOOP get_menu;
+
+    CLOSE menuCursor;
+END //
+DELIMITER ;
+
+-- --------------------------------------------------------------------------------
+-- ProduceBill(OrderID)
+-- --------------------------------------------------------------------------------
+
+DELIMITER //
+CREATE FUNCTION ProduceBill
+(
+  OrderIDin smallint
+)
+-- Returns a long string as the bill
+RETURNS VARCHAR(2000)
+BEGIN
+    -- Create the header for the bill with the customer information
+    SET @Bill = (SELECT CONCAT('Customer Name: ', CustomerFirst, ' ', 
+          CustomerLast, char(13), char(10),  
+                'Email: ', 
+                CustomerEmail, CHAR(13), CHAR(10), 
+           'Phone Number: ', CustomerPhone, CHAR(13), CHAR(10), CHAR(13), CHAR(10))
+    FROM Customer c
+    JOIN Reservation r
+    ON c.CustomerID = r.CustomerID
+    JOIN Orders o
+    ON o.ReservationID = r.ReservationID
+    WHERE OrderID = OrderIDin);
+    
+    BEGIN
+    -- Create the cursor variables
+    DECLARE v_finished INTEGER DEFAULT 0;
+    DECLARE v_itemName VARCHAR(20);
+    DECLARE v_itemCost DECIMAL(10,2);
+    DECLARE v_itemQuantity SMALLINT;
+
+    -- Create the cursor
+    DECLARE BillingDetailsCursor CURSOR FOR
+    (SELECT ItemName, ItemCost, ItemQuantity FROM MenuItem mi JOIN OrderItem oi ON mi.ItemID = oi.ItemID JOIN Orders o ON oi.OrderID = o.OrderID WHERE o.OrderID = OrderIDin);
+
+    -- Define when to finish the cursor
+    DECLARE CONTINUE HANDLER
+    FOR NOT FOUND SET v_finished = 1;
+    
+    -- The result variable
+    SET @BillingTotal = 0.0;
+    
+    -- Start the cursor and loop
+    OPEN BillingDetailsCursor;
+    billing_details: LOOP
+    
+    -- Fetch the variables from the cursor
+    FETCH BillingDetailsCursor INTO v_itemName, v_itemCost, v_itemQuantity;
+
+    -- Check if the cursor is finished
+    IF v_finished = 1 THEN
+      LEAVE billing_details;
+    END IF;
+    
+    -- Concatenate values together to form bill line
+    SET @Bill = CONCAT(@Bill, CONCAT(v_itemName, " $", CAST(v_itemCost AS CHAR), " Qty: ", v_itemQuantity, CHAR(13), CHAR(10)));
+    
+    -- Add up the total for the bill
+    SET @BillingTotal = @BillingTotal + v_itemCost * v_itemQuantity;
+    
+    -- End the loop and close the cursor
+    END LOOP billing_details;
+      
+    CLOSE BillingDetailsCursor;
+      
+    END;
+    
+    -- Add the bill total to the bill
+    SET @Bill = (CONCAT(@Bill, CHAR(13), CHAR(10), 'Billing Total: $', CAST(@BillingTotal AS CHAR)));
+    
+    -- Insert the bill total into the billing table
+    INSERT INTO billing(OrderID, BillAmount, BillPaid) VALUES(OrderIDin, @BillingTotal, 0);
+      
+    RETURN @Bill;
+ END //
+ DELIMITER ;
+
+ -- --------------------------------------------------------------------------------
+-- CalculateDailyEarnings(RestaurantID, date)
+-- --------------------------------------------------------------------------------
+
+DELIMITER //
+CREATE FUNCTION CalculateDailyEarnings
+(
+  RestaurantIDin smallint,
+  Datein         date
+)
+-- Return result as a monetary value
+RETURNS decimal(4,2)
+BEGIN
+      -- Declare cursor variables
+      DECLARE v_finished INTEGER DEFAULT 0;
+      DECLARE t_cost DECIMAL(10,2);
+      
+      -- Create the cursor
+      DECLARE orderCursor CURSOR FOR 
+      (SELECT BillAmount FROM billing b JOIN Orders o ON b.OrderID = o.OrderID JOIN reservation r ON o.ReservationID = r.ReservationID JOIN restaurant rest ON r.RestaurantID = rest.RestaurantID WHERE rest.RestaurantID = RestaurantIDin AND DATE(ReservationDateTime) = Datein);
+      
+      -- Define when the cursor is finished
+      DECLARE CONTINUE HANDLER
+      FOR NOT FOUND SET v_finished = 1;
+      
+      -- The result variable
+      SET @result = 0;
+      
+      -- Start the cursor and loop
+      OPEN orderCursor;
+      get_amount: LOOP
+      
+      -- Fetch the cursor values into the variables
+      FETCH orderCursor INTO t_cost;
+      
+      -- Check if the cursor is finished
+      IF v_finished = 1 THEN
+        LEAVE get_amount;
+      END IF;
+      
+      -- Update the result variable by summing with the cost
+      SET @result = @result + t_cost;
+      
+      -- End the loop and cursor
+      END LOOP get_amount;
+      
+      CLOSE orderCursor;
+
+  RETURN @result;
+END //
+DELIMITER ;
+
+-- ----------------------------------------------------------------------------
+-- CalculateCancellationFee(ReservationID)
+-- --------------------------------------------------------------------------------
+
+DELIMITER //
+CREATE FUNCTION CalculateCancellationFees 
+(
+  ReservationIDin smallint,
+  CancellationDate date
+)
+-- Returns a monetary value
+RETURNS DECIMAL(10,2)
+BEGIN
+  SET @ChargeAmount = 0;
+  -- If cancellation is between 2-4 days the charge is $15
+  IF ((DATEDIFF((SELECT ReservationDateTime FROM Reservation WHERE ReservationID = ReservationIDin), CancellationDate)<=4) AND (DATEDIFF((SELECT ReservationDateTime FROM Reservation WHERE ReservationID = ReservationIDin), CancellationDate)>=2)) THEN
+      SET @ChargeAmount = 15;
+  -- If the cancellation is less than 2 days the charge is $30
+  ELSEIF (DATEDIFF((SELECT ReservationDateTime FROM Reservation WHERE ReservationID = ReservationIDin), CancellationDate)<=2) THEN
+      SET @ChargeAmount = 30;
+  END IF;
+  
+  RETURN @ChargeAmount;
+END //
+DELIMITER ;

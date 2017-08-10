@@ -5,7 +5,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Pickle Restaurant sp_AddBillToFARMS</title>
+<title>Pickle Restaurant sp_InsertGuestToRestaurant</title>
 
 <!-- 
 Author: Cameron Pickle
@@ -50,21 +50,53 @@ Author: Cameron Pickle
   </nav>
 	<div class="container">
     <pre><code><samp>----------------------------------------------------------------------------------
--- sp_AddBillToFARMS(OrderID)
+-- sp_InsertGuestToRestaurant
 ----------------------------------------------------------------------------------
-CREATE PROCEDURE sp_AddBillToFARMS
-  IN OrderID  smallint
+
+USE Pickle_FARMS
+
+GO
+
+-- check to see if sp_InsertGuestToRestaurant exists
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_NAME= 'sp_InsertGuestToRestaurant')
+  DROP PROCEDURE sp_InsertGuestToRestaurant;
+GO
+
+-- create procedure
+CREATE PROCEDURE sp_InsertGuestToRestaurant
+  @GuestID      smallint
+AS
 BEGIN
-INSERT INTO TITAN_Pickle.Pickle_FARMS.dbo.Billing (GuestFirstName, GuestLastName, GuestAddress, GuestCity, GuestPostalCode)
-  VALUES(
-    @FolioID, 
-    @BillingCategoryID,
-    @BillingDescription,
-    @BillingAmount,
-    @BillingItemQty,
-    @BillintItemDate)
+  DECLARE @GuestFirst VARCHAR(20)
+  DECLARE @GuestLast VARCHAR(20)
+  DECLARE @GuestEmail VARCHAR(50)
+  DECLARE @GuestPhone VARCHAR(20)
   
-END</samp></code></pre>
+  SET @GuestFirst = (SELECT GuestFirst FROM Guest WHERE GuestID = @GuestID)
+  SET @GuestLast = (SELECT GuestLast FROM Guest WHERE GuestID = @GuestID)
+  SET @GuestEmail = (SELECT GuestEmail FROM Guest WHERE GuestID = @GuestID)
+  SET @GuestPhone = (SELECT GuestPhone FROM Guest WHERE GuestID = @GuestID)
+
+  Exec (  'CALL sp_InsertCustomer(''' + @GuestFirst + 
+      ''', ''' + @GuestLast + 
+      ''', ''' + @GuestEmail + 
+      ''', ''' + @GuestPhone + 
+      ''', @null)') AT LINKED_MYSQL
+  
+END
+
+GO
+
+-- test by adding guest 1500
+EXEC sp_InsertGuestToRestaurant
+  @GuestID      = 1500
+  
+GO
+
+SELECT * FROM openquery(LINKED_MYSQL, 'SELECT * FROM Customer')
+
+GO
+</samp></code></pre>
   </div>
 
 

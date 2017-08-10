@@ -50,18 +50,30 @@ Author: Cameron Pickle
   </nav>
   <div class="container">
     <pre><code><samp>-- --------------------------------------------------------------------------------
--- sp_UpdatePrices(PercentChange, ItemID = 0)
+-- sp_UpdatePrices(PercentChange, ItemIDin)
 -- --------------------------------------------------------------------------------
 DELIMITER //
 CREATE PROCEDURE sp_UpdatePrices(
     IN PercentChange DOUBLE(10,2),
-    IN ItemID SMALLINT
+    IN ItemIDin SMALLINT
 )
 BEGIN
-  IF ItemID = 0 THEN
+  -- If the ItemIDin is 0 then update all Items
+  IF ItemIDin = 0 THEN
     UPDATE MenuItem SET ItemCost = ItemCost * (1+CONVERT(PercentChange/100, Decimal(10,2)));
-  else
-    UPDATE MenuItem SET ItemCost = ItemCost * (1+CONVERT(PercentChange/100, Decimal(10,2))) WHERE ItemID = ItemID;
+  -- If the ItemIDin is a specific number then update that Item
+  ELSE
+    -- Validate that the ItemID exists
+    IF (SELECT ItemID FROM MenuItem WHERE ItemID = ItemIDin) IS NOT NULL THEN
+      -- If it does update the item's price
+      UPDATE MenuItem SET ItemCost = ItemCost * (1+CONVERT(PercentChange/100, Decimal(10,2))) WHERE ItemID = ItemIDin;
+    ELSE
+      -- If it doesn't throw an error
+      SET @ErrMsg = CONCAT(ItemIDin, " is not a valid item ID. Please enter a valid item ID.");
+      SIGNAL SQLSTATE VALUE '03026'
+            SET MESSAGE_TEXT = @ErrMsg;
+    END IF;
+
   END IF;
 END//
 DELIMITER ;</samp></code></pre>

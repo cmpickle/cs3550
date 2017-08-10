@@ -5,7 +5,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Pickle Restaurant tr_ReferencialIntegrity</title>
+<title>Pickle Restaurant sp_GetBillAmountFromRestaurant</title>
 
 <!-- 
 Author: Cameron Pickle
@@ -50,14 +50,40 @@ Author: Cameron Pickle
   </nav>
 	<div class="container">
     <pre><code><samp>----------------------------------------------------------------------------------
--- tr_ReferencialIntegrity
+-- sp_GetBillAmountFromRestaurant
 ----------------------------------------------------------------------------------
-CREATE TRIGGER tr_ReferencialIntegrity AFTER INSERT ON Restaurant
-DECLARE @RestaurantID smallint
+
+USE Pickle_FARMS
+
+GO
+
+-- check to see if sp_GetBillAmountFromRestaurant exists
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_NAME= 'sp_GetBillAmountFromRestaurant')
+  DROP PROCEDURE sp_GetBillAmountFromRestaurant;
+GO
+
+-- create procedure
+CREATE PROCEDURE sp_GetBillAmountFromRestaurant
+  @OrderID      smallint
+AS
 BEGIN
-  Maintian the integrity..
-END</samp></code></pre>
-	</div>
+  DECLARE @result DECIMAL(10,2)
+
+  DECLARE @OPENQUERY nvarchar(4000), @TSQL nvarchar(4000), @LinkedServer nvarchar(4000)
+  SET @LinkedServer = 'LINKED_MYSQL'
+  SET @OPENQUERY = 'SELECT * FROM OPENQUERY('+ @LinkedServer + ', '''
+  SET @TSQL = 'SELECT BillAmount FROM Billing WHERE BillingID = ' + CONVERT(VARCHAR, @OrderID) + ''')'
+  EXEC (@OPENQUERY+@TSQL)
+END
+
+GO
+
+-- test by adding guest 1
+EXEC sp_GetBillAmountFromRestaurant
+  @OrderID      = 1
+  
+GO</samp></code></pre>
+  </div>
 
 
   <script type="text/JavaScript">

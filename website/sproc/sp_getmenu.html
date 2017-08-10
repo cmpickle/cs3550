@@ -60,28 +60,37 @@ CREATE PROCEDURE sp_GetMenu
   OUT Menu           varchar(2000)
 )
 BEGIN
+    -- Cursor variables
     DECLARE v_finished INTEGER DEFAULT 0;
     DECLARE menuItem VARCHAR(100);
 
+    -- Create the cursor
     DECLARE menuCursor CURSOR FOR
     (SELECT CONCAT(ItemName, " $", CAST(ItemCost AS CHAR), " ", ItemDescription, CHAR(10), CHAR(13)) 'Item' FROM menuitem WHERE restaurantID = RestaurantIDin);
 
+    -- The condition that sets when the cursor breaks the loop
     DECLARE CONTINUE HANDLER
     FOR NOT FOUND SET v_finished = 1;
     
+    -- Result variable
     SET Menu = "";
 
+    -- Open the cursor and start the loop
     OPEN menuCursor;
     get_menu: LOOP
 
+    -- Fetch values from cursor
     FETCH menuCursor INTO menuItem;
 
+    -- Check if cursor is finished
     IF v_finished = 1 THEN 
     LEAVE get_menu;
     END IF;
 
+    -- Update the result variable by concatenating on the new values
     SET Menu = CONCAT(Menu, menuItem);
 
+    -- End and close the cursor
     END LOOP get_menu;
 
     CLOSE menuCursor;

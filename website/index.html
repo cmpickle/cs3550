@@ -115,15 +115,9 @@ Author: Cameron Pickle
     								
     								<div class="entry bg-info">
       								<p class="entryHeader"><a href="trigger/tr_insertorderitem.html">tr_InsertOrderItem</a></p>
-      								<p>Type: On Insert - Instead Of</p>
+      								<p>Type: On Insert - Before</p>
       								<p>Description: If the quantity of an order item is zero or less replace it with a 1. Since there cannot be a value that is zero or a fraction of an order then must be replaced with a valid amount and the default amount is 1.</p>
     								</div>
-                    
-                    <div class="entry bg-info">
-                      <p class="entryHeader"><a href="trigger/tr_referencialintegrity.html">tr_ReferencialIntegrity</a></p>
-                      <p>Type: On Insert - After</p>
-                      <p>Description: This trigger is used to maintain referencial integrity between the Pickle_Restaurants database and the Pickle_FARMS database.</p>
-                    </div>
     								
     								<div class="page-header">
     										 <h3>Business Rules Satisfied by Stored Procedures</h3>
@@ -146,20 +140,20 @@ Author: Cameron Pickle
                     <div class="entry bg-info">
                       <p class="entryHeader"><a href="sproc/sp_updateprices.html">UpdatePrices(PercentageChange, ItemID)</a></p>
                       <p>Description: Updates the prices of food on the Menu table. If ItemID is set to 0 then all menu items will be affected. The price will increase if the percentage is positive and it will decrease if it is negative. It will throw an exception if the MenuItemID doesn't exist.</p>
-                      <p>Input Parameters: RestaurantID</p>
+                      <p>Input Parameters: RestaurantID, ItemID</p>
                       <p>Output Parameters: N/A</p>
                     </div>
                     
                     <div class="entry bg-info">
                       <p class="entryHeader"><a href="sproc/sp_updatereservationstatus.html">UpdateReservationStatus(ReservationID, ReservationStatus)</a></p>
-                      <p>Description: Updates the status of a reservation<. This procedure only updates the reservation status column of the Reservation table. It is used to change the current status of a reservation. It will throw an exception if on of the valid reservation statuses are not used or if the ReservationID doesn't exist.</p>
-                      <p>Input Parameters: RestaurantID</p>
+                      <p>Description: Updates the status of a reservation. This procedure only updates the reservation status column of the Reservation table. It is used to change the current status of a reservation. It will throw an exception if on of the valid reservation statuses are not used or if the ReservationID doesn't exist.</p>
+                      <p>Input Parameters: RestaurantID, Reservation Status</p>
                       <p>Output Parameters: N/A</p>
                     </div>
                     
                     <div class="entry bg-info">
                       <p class="entryHeader"><a href="sproc/sp_getmenu.html">GetMenu(RestaurantID)</a></p>
-                      <p>Description: Gets the menu for a given hotel. All of the menu items that are associated with the given RestaurantID will be returned in a table. A cursor is used to loop through the menu items of a restaurant and append them together to form a menu. If the Restaurant ID is invalid then an error message will be returned in the table.</p>
+                      <p>Description: Gets the menu for a given hotel. All of the menu items that are associated with the given RestaurantID will be returned in a table. A cursor is used to loop through the menu items of a restaurant and append them together to form a menu.</p>
                       <p>Input Parameters: RestaurantID</p>
                       <p>Output Paramenters: Hotel's Menu (varchar(2000))</p>
                     </div>
@@ -176,7 +170,7 @@ Author: Cameron Pickle
                     
                     <div class="entry bg-info">
                       <p class="entryHeader"><a href="udf/producebill.html">ProduceBill(OrderID)</a></p>
-                      <p>Description: Creates a bill for a given order. The UDF will use a cursor to loop through all of the order's menu items and create a bill. If the order ID is invalid a error message will be returned.</p>
+                      <p>Description: Creates a bill for a given order. The UDF will use a cursor to loop through all of the order's menu items and create a bill. This bill will be displayed to the user and the bill total will be inserted into the billing table for the specified order.</p>
                       <p>Input Parameters: OrderID</p>
                       <p>Returns: Customer's Bill (varchar(2000))</p>
                     </div>
@@ -190,7 +184,7 @@ Author: Cameron Pickle
                     
                     <div class="entry bg-info">
                       <p class="entryHeader"><a href="udf/calculatecancellationfee.html">CalculateCancellationFee(ReservationID)</a></p>
-                      <p>Description: Calculates the cancellation fee for a reservation. If the reservation is cancelled less than two days before then there is a $30 cancellation fee. If the reservation is cancelled two to four days out there will be a $15 cancellation fee. If the Reservation ID doesn't exist then an error message will be returned.</p>
+                      <p>Description: Calculates the cancellation fee for a reservation. If the reservation is cancelled less than two days before then there is a $30 cancellation fee. If the reservation is cancelled two to four days out there will be a $15 cancellation fee.</p>
                       <p>Input Parameters: ReservationID</p>
                       <p>Returns: CancellationFee (Double(10,2))</p>
                     </div>
@@ -205,14 +199,14 @@ Author: Cameron Pickle
                     </ul>
                     
                     <div class="entry bg-info">
-                      <p class="entryHeader"><a href="distributedqueries/sp_addbilltofarms.html">AddBillToFARMS(OrderID)</a></p>
+                      <p class="entryHeader"><a href="distributedqueries/sp_getbillamountfromrestaurant.html">AddBillToFARMS(OrderID)</a></p>
                       <p>Description: Adds the customer's restuarant bill to their account on the FARMS database. A linked server is used to make a query on the FARMS database that inserts the customer's bill into the FARMS database using their data from the Restaurant database. An error is returned if the reservation ID doesn't exist or if the customer doesn't exist in the FARMS database.</p>
                       <p>Input Parameters: OrderID</p>
                       <p>Returns:</p>
                     </div>
                     
                     <div class="entry bg-info">
-                      <p class="entryHeader"><a href="distributedqueries/sp_retrievecustomerfromfarms.html">RetrieveCustomerFromFARMS(CustomerID)</a></p>
+                      <p class="entryHeader"><a href="distributedqueries/sp_insertguesttorestaurant.html">RetrieveCustomerFromFARMS(CustomerID)</a></p>
                       <p>Description: Retrieves a customer form the FARMS database and inserts it into the Restaurant database. The cusomers then are able to make reservations in the Restaurant database. An error is returned if the customer ID doesn't exist.</p>
                       <p>Input Parameters: CustomerID</p>
                       <p>Returns:</p>
@@ -226,6 +220,8 @@ Author: Cameron Pickle
 							<ul class="otherScripts">
 									<li><a href="otherscripts/creationScript.html">Creation Script</a></li>
 									<li><a href="otherscripts/insertScript.html">Insert Into Statements With Sample Data</a></li>
+                  <li><a href="otherscripts/sampleScript.html">Sample Script</a></li>
+                  <li><a href="otherscripts/fullSetupScript.html">Full Setup Script</a></li>
 							</ul>
     								
     			 </section>

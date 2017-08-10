@@ -59,31 +59,40 @@ CREATE FUNCTION CalculateDailyEarnings
   RestaurantIDin smallint,
   Datein         date
 )
+-- Return result as a monetary value
 RETURNS decimal(4,2)
 BEGIN
+      -- Declare cursor variables
       DECLARE v_finished INTEGER DEFAULT 0;
       DECLARE t_cost DECIMAL(10,2);
       
+      -- Create the cursor
       DECLARE orderCursor CURSOR FOR 
       (SELECT BillAmount FROM billing b JOIN Orders o ON b.OrderID = o.OrderID JOIN reservation r ON o.ReservationID = r.ReservationID JOIN restaurant rest ON r.RestaurantID = rest.RestaurantID WHERE rest.RestaurantID = RestaurantIDin AND DATE(ReservationDateTime) = Datein);
       
+      -- Define when the cursor is finished
       DECLARE CONTINUE HANDLER
       FOR NOT FOUND SET v_finished = 1;
       
-            
+      -- The result variable
       SET @result = 0;
       
+      -- Start the cursor and loop
       OPEN orderCursor;
       get_amount: LOOP
       
+      -- Fetch the cursor values into the variables
       FETCH orderCursor INTO t_cost;
       
+      -- Check if the cursor is finished
       IF v_finished = 1 THEN
         LEAVE get_amount;
       END IF;
       
+      -- Update the result variable by summing with the cost
       SET @result = @result + t_cost;
       
+      -- End the loop and cursor
       END LOOP get_amount;
       
       CLOSE orderCursor;

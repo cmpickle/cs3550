@@ -1,0 +1,34 @@
+----------------------------------------------------------------------------------
+-- sp_InsertBillToFARMS
+----------------------------------------------------------------------------------
+
+USE Pickle_FARMS
+
+GO
+
+-- check to see if sp_InsertBillToFARMS exists
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_NAME= 'sp_InsertBillToFARMS')
+	DROP PROCEDURE sp_InsertBillToFARMS;
+GO
+
+-- create procedure
+CREATE PROCEDURE sp_InsertBillToFARMS
+	@OrderID			smallint
+AS
+BEGIN
+	DECLARE @result DECIMAL(10,2)
+
+	DECLARE @OPENQUERY nvarchar(4000), @TSQL nvarchar(4000), @LinkedServer nvarchar(4000)
+	SET @LinkedServer = 'LINKED_MYSQL'
+	SET @OPENQUERY = 'SELECT * FROM OPENQUERY('+ @LinkedServer + ', '''
+	SET @TSQL = 'SELECT BillAmount FROM Billing WHERE BillingID = ' + CONVERT(VARCHAR, @OrderID) + ''')'
+	EXEC (@OPENQUERY+@TSQL)
+END
+
+GO
+
+-- test by adding guest 1
+EXEC sp_InsertBillToFARMS
+	@OrderID			= 1
+	
+GO

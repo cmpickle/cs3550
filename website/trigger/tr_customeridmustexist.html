@@ -57,11 +57,15 @@ DELIMITER //
 CREATE TRIGGER tr_CustomerIDMustExist AFTER INSERT ON Reservation
 FOR EACH ROW
 BEGIN
-      DECLARE CustomerID SMALLINT;
+    DECLARE CustomerID SMALLINT;
+
+    -- If the customer ID that is being inserted does not exist in the reservation table
     IF NEW.CustomerID NOT IN (SELECT c.CustomerID FROM Reservation r JOIN Customer c ON r.CustomerID = c.CustomerID WHERE c.CustomerID = NEW.CustomerID) THEN
-            SET CustomerID = (SELECT CustomerID FROM Customer WHERE Customer.CustomerID = NEW.CustomerID);
+      SET @ErrMsg = CONCAT(NEW.CustomerID, " is not a valid customer ID. Please enter a valid customer ID.");
+
+      -- Throw an error and roll back transaction
       SIGNAL SQLSTATE VALUE '02026'
-          SET MESSAGE_TEXT = " is not a valid customer ID. Please enter a valid customer ID.";
+          SET MESSAGE_TEXT = @ErrMsg;
     END IF;
 END //
 DELIMITER ;</samp></code></pre>

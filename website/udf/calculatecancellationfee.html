@@ -59,12 +59,14 @@ CREATE FUNCTION CalculateCancellationFees
   ReservationIDin smallint,
   CancellationDate date
 )
+-- Returns a monetary value
 RETURNS DECIMAL(10,2)
 BEGIN
-  SET @ChargeAmount = 0.00;
   SET @ChargeAmount = 0;
+  -- If cancellation is between 2-4 days the charge is $15
   IF ((DATEDIFF((SELECT ReservationDateTime FROM Reservation WHERE ReservationID = ReservationIDin), CancellationDate)<=4) AND (DATEDIFF((SELECT ReservationDateTime FROM Reservation WHERE ReservationID = ReservationIDin), CancellationDate)>=2)) THEN
       SET @ChargeAmount = 15;
+  -- If the cancellation is less than 2 days the charge is $30
   ELSEIF (DATEDIFF((SELECT ReservationDateTime FROM Reservation WHERE ReservationID = ReservationIDin), CancellationDate)<=2) THEN
       SET @ChargeAmount = 30;
   END IF;

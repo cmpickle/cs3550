@@ -58,8 +58,10 @@ CREATE FUNCTION ProduceBill
 (
   OrderIDin smallint
 )
+-- Returns a long string as the bill
 RETURNS VARCHAR(2000)
 BEGIN
+    -- Create the header for the bill with the customer information
     SET @Bill = (SELECT CONCAT('Customer Name: ', CustomerFirst, ' ', 
           CustomerLast, char(13), char(10),  
                 'Email: ', 
@@ -73,40 +75,52 @@ BEGIN
     WHERE OrderID = OrderIDin);
     
     BEGIN
+    -- Create the cursor variables
     DECLARE v_finished INTEGER DEFAULT 0;
     DECLARE v_itemName VARCHAR(20);
     DECLARE v_itemCost DECIMAL(10,2);
     DECLARE v_itemQuantity SMALLINT;
 
+    -- Create the cursor
     DECLARE BillingDetailsCursor CURSOR FOR
     (SELECT ItemName, ItemCost, ItemQuantity FROM MenuItem mi JOIN OrderItem oi ON mi.ItemID = oi.ItemID JOIN Orders o ON oi.OrderID = o.OrderID WHERE o.OrderID = OrderIDin);
 
+    -- Define when to finish the cursor
     DECLARE CONTINUE HANDLER
     FOR NOT FOUND SET v_finished = 1;
     
+    -- The result variable
     SET @BillingTotal = 0.0;
     
+    -- Start the cursor and loop
     OPEN BillingDetailsCursor;
     billing_details: LOOP
     
-        FETCH BillingDetailsCursor INTO v_itemName, v_itemCost, v_itemQuantity;
+    -- Fetch the variables from the cursor
+    FETCH BillingDetailsCursor INTO v_itemName, v_itemCost, v_itemQuantity;
 
+    -- Check if the cursor is finished
     IF v_finished = 1 THEN
       LEAVE billing_details;
     END IF;
     
+    -- Concatenate values together to form bill line
     SET @Bill = CONCAT(@Bill, CONCAT(v_itemName, " $", CAST(v_itemCost AS CHAR), " Qty: ", v_itemQuantity, CHAR(13), CHAR(10)));
     
+    -- Add up the total for the bill
     SET @BillingTotal = @BillingTotal + v_itemCost * v_itemQuantity;
     
+    -- End the loop and close the cursor
     END LOOP billing_details;
       
     CLOSE BillingDetailsCursor;
       
     END;
     
+    -- Add the bill total to the bill
     SET @Bill = (CONCAT(@Bill, CHAR(13), CHAR(10), 'Billing Total: $', CAST(@BillingTotal AS CHAR)));
     
+    -- Insert the bill total into the billing table
     INSERT INTO billing(OrderID, BillAmount, BillPaid) VALUES(OrderIDin, @BillingTotal, 0);
       
     RETURN @Bill;
