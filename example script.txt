@@ -15,6 +15,7 @@ INSERT INTO reservation(reservationdatetime, restaurantid, customerid, reservati
 -- -----------------------------
 -- Activates Trigger
 UPDATE reservation SET ReservationStatus = 'X' WHERE ReservationID  = 2;
+UPDATE reservation SET ReservationStatus = 'X' WHERE ReservationID  = 3;
 
 -- -----------------------------
 -- tr_ValidInsertReservationStatus
@@ -23,6 +24,7 @@ UPDATE reservation SET ReservationStatus = 'X' WHERE ReservationID  = 2;
 INSERT INTO reservation(ReservationDateTime, RestaurantID, CustomerID, ReservationStatus) VALUES('2017-08-08', 5000, 4, 'R');
 -- Invalid Reservation Status
 INSERT INTO reservation(ReservationDateTime, RestaurantID, CustomerID, ReservationStatus) VALUES('2017-08-08', 5000, 4, 'Q');
+INSERT INTO reservation(ReservationDateTime, RestaurantID, CustomerID, ReservationStatus) VALUES('2017-08-08', 5000, 4, '1');
 
 -- -----------------------------
 -- tr_ValidUpdateReservationStatus
@@ -31,12 +33,14 @@ INSERT INTO reservation(ReservationDateTime, RestaurantID, CustomerID, Reservati
 UPDATE reservation SET ReservationStatus = 'R' WHERE ReservationID = 1;
 -- Invalid Reservation Status
 UPDATE reservation SET ReservationStatus = 'Q' WHERE ReservationID = 1;
+UPDATE reservation SET ReservationStatus = '1' WHERE ReservationID = 1;
 
 -- -----------------------------
 -- tr_InsertOrderItem
 -- -----------------------------
 -- Query where ItemQuantity is Replaced
 INSERT INTO orderitem(ItemID, OrderID, ItemQuantity) VALUES(1, 2, 0);
+INSERT INTO orderitem(ItemID, OrderID, ItemQuantity) VALUES(1, 2, -1);
 -- Query where ItemQuantity isn't Replaced
 INSERT INTO orderitem(ItemID, OrderID, ItemQuantity) VALUES(1, 2, 2);
 
@@ -49,21 +53,30 @@ INSERT INTO orderitem(ItemID, OrderID, ItemQuantity) VALUES(1, 2, 2);
 -- sp_InsertCustomer
 -- -----------------------------
 -- Inserts me as a customer
+SET @customerID = 0;
 call sp_InsertCustomer('Cameron', 'Pickle', 'cmpickle@gmail.com', '8016948594', @customerID);
+SELECT @customerID;
+
+SET @customerID = 0;
+call sp_InsertCustomer('Jonh', 'Doe', 'john@doe.com', '8015555555', @customerID);
+SELECT @customerID;
 
 -- -----------------------------
 -- sp_UpdatePrices
 -- -----------------------------
 -- Increases MenuItem 1 by 11%
 call sp_UpdatePrices(11, 1);
+call sp_UpdatePrices(11, 0);
 -- Decreases all MenuItems by 11%
 call sp_UpdatePrices(-11, 0);
+call sp_UpdatePrices(-11, 2);
 
 -- -----------------------------
 -- sp_ReservationStatus
 -- -----------------------------
 -- Updates a reservation's Reservation Status
-CALL sp_ReservationStatus(1, 'C');
+CALL sp_UpdateReservationStatus(1, 'C');
+CALL sp_UpdateReservationStatus(1, 'X');
 
 -- -----------------------------
 -- sp_GetMenu
@@ -71,6 +84,10 @@ CALL sp_ReservationStatus(1, 'C');
 -- Returns a menu for the given restaurant
 SET @menu = "";
 CALL sp_GetMenu(5000, @menu);
+SELECT @menu;
+
+SET @menu = "";
+CALL sp_GetMenu(5002, @menu);
 SELECT @menu;
 
 
@@ -94,4 +111,4 @@ SELECT CalculateDailyEarnings(5000, '2017-07-28');
 -- CalculateCancellationFees
 -- -----------------------------
 -- Calculates the cancellation fees for reservation 5 
-SELECT CalculateCancellationFees(5, '2017-08-04');
+SELECT CalculateCancellationFees(5, '2017-10-10');

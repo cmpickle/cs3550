@@ -1,18 +1,18 @@
 ----------------------------------------------------------------------------------
--- sp_InsertBillToFARMS
+-- sp_BillAmountFromRestaurant
 ----------------------------------------------------------------------------------
 
 USE Pickle_FARMS
 
 GO
 
--- check to see if sp_InsertBillToFARMS exists
-IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_NAME= 'sp_InsertBillToFARMS')
-	DROP PROCEDURE sp_InsertBillToFARMS;
+-- check to see if sp_BillAmountFromRestaurant exists
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_NAME= 'sp_BillAmountFromRestaurant')
+	DROP PROCEDURE sp_BillAmountFromRestaurant;
 GO
 
 -- create procedure
-CREATE PROCEDURE sp_InsertBillToFARMS
+CREATE PROCEDURE sp_BillAmountFromRestaurant
 	@OrderID			smallint
 AS
 BEGIN
@@ -28,7 +28,7 @@ END
 GO
 
 -- test by adding guest 1
-EXEC sp_InsertBillToFARMS
+EXEC sp_BillAmountFromRestaurant
 	@OrderID			= 1
 	
 GO

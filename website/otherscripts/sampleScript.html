@@ -114,7 +114,7 @@ call sp_UpdatePrices(-11, 0);
 -- sp_ReservationStatus
 -- -----------------------------
 -- Updates a reservation's Reservation Status
-CALL sp_ReservationStatus(1, 'C');
+CALL sp_UpdateReservationStatus(1, 'C');
 
 -- -----------------------------
 -- sp_GetMenu
@@ -145,7 +145,7 @@ SELECT CalculateDailyEarnings(5000, '2017-07-28');
 -- CalculateCancellationFees
 -- -----------------------------
 -- Calculates the cancellation fees for reservation 5 
-SELECT CalculateCancellationFees(5, '2017-08-04');</samp></code></pre>
+SELECT CalculateCancellationFees(5, '2017-10-10');</samp></code></pre>
 	</div>
 
 
